@@ -1,7 +1,6 @@
 # OSP Solubility Toolbox
 
-This folder contains the OSP Solubility Toolbox, an R-based framework designed to analyze *in vitro* solubility data. The framework is descrbased in greater detail in Vrenken et al. [[1](#References)]. It includes a Shiny App for interactive data visualization and parameter fitting, as well as a set of functions for parameter optimization and solubility calculations.
-
+This folder contains the OSP Solubility Toolbox, an R-based framework designed to analyze *in vitro* solubility data. The framework is descrbased in greater detail in Vrenken et al. [[1](#References)]. It includes a Shiny App for interactive data visualization and parameter fitting, as well as a set of functions for solubility calculations at different pH values in the absence or presence of bile salts.
 
 ## Features
 
@@ -28,7 +27,7 @@ To use the OSP Solubility Toolbox, ensure you have the following installed:
    git clone https://github.com/yourusername/OSP-Solubility-Toolbox.git
    ```
 
-2. Open the R script in RStudio.
+2. Open the R script `OSP_SolubilityToolbox.R` in RStudio.
 
 3. Install the required R packages (if not already installed):
 
@@ -36,10 +35,10 @@ To use the OSP Solubility Toolbox, ensure you have the following installed:
    install.packages(c("shiny", "shinythemes", "shinyWidgets", "gdata", "openxlsx", "ggplot2", "gridExtra"))
    ```
 
-4. Source the additional functions file in your R script:
+4. Start the Shiny App in R:
 
    ```R
-   source("functions.R")
+   runApp('OSP_SolubilityToolbox.R')
    ```
 
 ### Usage
