@@ -32,7 +32,7 @@ To use the OSP Solubility Toolbox, ensure you have the following installed:
 3. Install the required R packages (if not already installed):
 
    ```R
-   install.packages(c("shiny", "shinythemes", "shinyWidgets", "gdata", "openxlsx", "ggplot2", "gridExtra"))
+   install.packages(c('shiny', 'shinythemes', 'shinyWidgets', 'gdata', 'openxlsx', 'ggplot2', 'gridExtra'))
    ```
 
 4. Start the Shiny App in R:
@@ -43,7 +43,7 @@ To use the OSP Solubility Toolbox, ensure you have the following installed:
 
 ### Usage
 
-1. Populate the provided Excel template with your solubility data.
+1. Populate the provided Excel template `SolubilityData.xlsx` with your solubility data.
 2. Run the R script to start the Shiny App and fit the solubility-related parameters.
 3. Explore the Shiny App for interactive analysis and visualization of your results.
 
