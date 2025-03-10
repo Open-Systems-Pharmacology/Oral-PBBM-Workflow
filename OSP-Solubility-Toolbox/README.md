@@ -58,9 +58,3 @@ The framework is distributed under the [GPLv2 License](https://github.com/Open-S
 
 ## References
 [1] [Vrenken P, Vertzoni M, Frechen S, Solodenko J, Meyer M, Muenster U, Dallmann A. Development of a novel Physiologically Based Biopharmaceutics modeling (PBBM) framework using the Open Systems Pharmacology Suite, Part 1: in vitro modeling of Vericiguat. *Eur J Pharm Sci.* 2025.](https://github.com/Open-Systems-Pharmacology/Oral-PBBM-Workflow)
-
-
-
----
-
-Feel free to customize any sections, such as the contact information or specific details about the functions and features, to better suit your project!
