@@ -1,6 +1,6 @@
 # OSP Solubility Toolbox
 
-This folder contains the OSP Solubility Toolbox, an R-based framework designed to analyze *in vitro* solubility data. The framework is descrbased in greater detail in Vrenken et al. [[1](#References)]. It includes a Shiny App for interactive data visualization and parameter fitting, as well as a set of functions for solubility calculations at different pH values in the absence or presence of bile salts.
+This folder contains the OSP Solubility Toolbox, an R-based framework designed to analyze *in vitro* solubility data. The framework is described in greater detail in the article series by Vrenken et al. [[1](#References)]. It includes a Shiny App for interactive data visualization and parameter fitting, as well as a set of functions for solubility calculations at different pH values in the absence or presence of bile salts.
 
 ## Features
 
