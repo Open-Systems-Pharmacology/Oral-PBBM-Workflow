@@ -132,12 +132,23 @@ ui <- fluidPage(
                         ),
                         
                         em(textOutput("IntS.txt")),br(),
+                        
+                        # Optimization Scale option:
+                        fluidRow(
+                          column(6,
+                                 radioButtons("fit_scale", "Optimization Scale:",
+                                              choices = list("Linear" = "linear", "Logarithmic" = "log"),
+                                              selected = "linear")
+                          )
+                        ),
+                        
                         fluidRow(  
                           column(3, actionButton("Kfit", "Estimate Km:w")),
                           column(3, offset = 0.5, downloadButton("downloadBRpred", "Export tables")),
                           column(3, offset = 0.5, downloadButton("downloadBRreport", "Export plots"))
                         ), br()
                       ),
+                      
                       mainPanel(h4(p("Upload observed solubility data and input the API properties, then press 'Estimate Km:w' 
                                      in order to fit the micelle partitioning coefficient(s) to your data")),
                                 tableOutput("K.tab"),

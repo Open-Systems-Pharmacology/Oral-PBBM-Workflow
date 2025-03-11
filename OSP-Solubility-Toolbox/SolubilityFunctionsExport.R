@@ -368,7 +368,7 @@ S.ion.f <- function(obs.br) {
 }
 
 
-LogK.nlm.f <- function(obs.br) {
+LogK.nlm.f <- function(obs.br, fit_scale = "linear") {
   # Subset input data for NLM functions and estimate the Bile Salt affinity constants
   obs.br <- S.ion.f(obs.br)
   BR.Fit <- obs.br[, 'BR.S_mg.ml']
@@ -376,27 +376,48 @@ LogK.nlm.f <- function(obs.br) {
   BS.Fit <- obs.br[, 'BS_mM']
   Si.Fit <- obs.br[, 'S_ion']
   
-  # Run nls function
-  if (CT0 == 0 & CT1 == 0 & CT2 == 0) {
-    LogK <- nls(BR.Fit ~ ((BS.Fit*(S_int/(1e3*C.H2O))*10^Log.K.mw.n+S_int)),
-                start = list(Log.K.mw.n = IE.Kn), 
-                algorithm = "port", lower = list(Log.K.mw.n = 0))
-    Log.K.mw.i <- 0
+  # Define the fitting function based on fitting scale
+  if (fit_scale == "log") {
+    # For neutral compounds
+    if (CT0 == 0 & CT1 == 0 & CT2 == 0) {
+      LogK <- nls(log(BR.Fit) ~ log((BS.Fit*(S_int/(1e3*C.H2O))*10^Log.K.mw.n+S_int)),
+                  start = list(Log.K.mw.n = IE.Kn), 
+                  algorithm = "port", 
+                  lower = list(Log.K.mw.n = 0))
+      Log.K.mw.i <- 0
+    } else {
+      # For ionizable compounds
+      LogK <- nls(log(BR.Fit) ~ log((BS.Fit*(S_int/(1e3*C.H2O))*10^Log.K.mw.n+S_int) +
+                                      (BS.Fit*(Si.Fit/(1e3*C.H2O))*10^Log.K.mw.i+Si.Fit)),
+                  start = list(Log.K.mw.n = IE.Kn, Log.K.mw.i = IE.Ki),
+                  algorithm = "port", 
+                  lower = list(Log.K.mw.n = 0, Log.K.mw.i = 0))
+      Log.K.mw.i <- environment(LogK[["m"]][["fitted"]])[["env"]][["Log.K.mw.i"]]
+    }
   } else {
-    LogK <- nls(BR.Fit ~ ((BS.Fit*(S_int/(1e3*C.H2O))*10^Log.K.mw.n+S_int) +
-                            (BS.Fit*(Si.Fit/(1e3*C.H2O))*10^Log.K.mw.i+Si.Fit)),
-                start = list(Log.K.mw.n = IE.Kn, Log.K.mw.i = IE.Ki),algorithm = "port", 
-                lower = list(Log.K.mw.n = 0, Log.K.mw.i = 0))
-    Log.K.mw.i <- environment(LogK[["m"]][["fitted"]])[["env"]][["Log.K.mw.i"]]
+    # Original linear weighting
+    if (CT0 == 0 & CT1 == 0 & CT2 == 0) {
+      LogK <- nls(BR.Fit ~ ((BS.Fit*(S_int/(1e3*C.H2O))*10^Log.K.mw.n+S_int)),
+                  start = list(Log.K.mw.n = IE.Kn), 
+                  algorithm = "port", 
+                  lower = list(Log.K.mw.n = 0))
+      Log.K.mw.i <- 0
+    } else {
+      LogK <- nls(BR.Fit ~ ((BS.Fit*(S_int/(1e3*C.H2O))*10^Log.K.mw.n+S_int) +
+                              (BS.Fit*(Si.Fit/(1e3*C.H2O))*10^Log.K.mw.i+Si.Fit)),
+                  start = list(Log.K.mw.n = IE.Kn, Log.K.mw.i = IE.Ki),
+                  algorithm = "port", 
+                  lower = list(Log.K.mw.n = 0, Log.K.mw.i = 0))
+      Log.K.mw.i <- environment(LogK[["m"]][["fitted"]])[["env"]][["Log.K.mw.i"]]
+    }
   }
   Log.K.mw.n <- environment(LogK[["m"]][["fitted"]])[["env"]][["Log.K.mw.n"]]
   
-  
-  return(list(obs.br=obs.br,LogK=LogK))
+  return(list(obs.br=obs.br, LogK=LogK))
 }
 
 Kmw.est.f <- eventReactive(input$Kfit, {
-  LogK    <- LogK.nlm.f(obs.br)$LogK
+  LogK    <- LogK.nlm.f(obs.br, fit_scale = input$fit_scale)$LogK
   coeff   <- if (CT0 == 0 & CT1 == 0 & CT2 == 0) {
     temp  <- as.data.frame(signif(summary(LogK)$coeff, digits = 6))
     empty <- c(0,"NA","NA","NA")
