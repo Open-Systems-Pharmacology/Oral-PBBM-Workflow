@@ -87,8 +87,17 @@ ui <- fluidPage(
                         ),br(),
                         
                         fluidRow(  
-                          column(7,autonumericInput("SG_I", "Initial Solubility Gain per charge:", min=1, max=1e6, value=1000, width = "235px",
+                          column(7,autonumericInput("SG_I", "Solubility Gain per charge:", min=1, max=1e6, value=1000, width = "130px",
                                                     decimalPlaces = 2, digitGroupSeparator = ",", decimalCharacter = ".")
+                          )
+                        ),
+                        
+                        # Optimization Scale option
+                        fluidRow(
+                          column(6,
+                                 radioButtons("sg_fit_scale", "Optimization Scale:",
+                                              choices = list("Linear" = "linear", "Logarithmic" = "log"),
+                                              selected = "linear")
                           )
                         ),
                         
