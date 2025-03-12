@@ -1,5 +1,6 @@
 # Required packages
 library(shiny)
+library(shinyjs)
 library(shinythemes)
 library(shinyWidgets)
 library(gdata) # Make sure the correct perl.exe (Strawberry) is called in read.xls()
@@ -8,12 +9,15 @@ library(ggplot2)
 library(gridExtra)
 
 ui <- fluidPage(
+  useShinyjs(), 
+  
   # Add OSP logo to navigation bar
   tags$head(tags$script(type="text/javascript", src = "code.js")),                   
   
   #Navbar structure for UI
   navbarPage(title = strong("OSP Solubility Toolbox"), inverse=T, theme = shinytheme("cerulean"),
              
+             # API Properties tab
              tabPanel("API properties", fluid = TRUE, icon = icon("pills"),
                       
                       # Sidebar layout with a input and output definitions
@@ -169,6 +173,75 @@ ui <- fluidPage(
                                 plotOutput(outputId = "KbsRes"),
                                 plotOutput(outputId = "predicted_vs_observed_bs")
                       )
+             ),
+             
+             # Surface/microenvironmental pH estimation tab
+             tabPanel("Surface pH", fluid = TRUE, icon = icon("flask-vial"),
+                      sidebarPanel(
+                        div(
+                          style = "background-color: #fff3cd; padding: 10px; margin-bottom: 15px; border: 1px solid #ffeeba; border-radius: 4px;",
+                          h4(style = "color: #856404; margin: 0;", "Preliminary Version"),
+                          p(style = "color: #856404; margin: 10px 0 0 0;", 
+                            "This functionality is preliminary and currently limited to monoprotic acids and bases only.")
+                        ),
+                        h3("Hydrogen and hydroxide"),
+                        fluidRow(
+                          column(6, numericInput("DH", "Diffusion coefficient of hydrogen [cm²/s]:", value = 1E-4, 
+                                                 min = 0, step = 1e-5)),
+                          column(6, numericInput("DOH", "Diffusion coefficient of hydroxide [cm²/s]:", value = 6.3E-5, 
+                                                 min = 0, step = 1e-6))
+                        ),
+                        numericInput("Kw", "Water dissociation constant [M²]:", value = 2.6E-14, 
+                                     min = 0, step = 1e-15),
+                        
+                        h3("Buffer"),
+                        fluidRow(
+                          column(6, numericInput("C_buffer", "Buffer concentration [M]:", value = 5E-2,
+                                                 min = 0, step = 1e-3)),
+                          column(6, selectInput("BT", "Buffer type:", 
+                                                choices = list("Base" = 1, "Acid" = -1, "Unbuffered" = 0),
+                                                selected = 1))
+                        ),
+                        fluidRow(
+                          column(6, selectInput("BcarB", "Bicarbonate buffer:", 
+                                                choices = list("No" = 0),
+                                                selected = 0)),
+                          column(6, numericInput("pKaYH", "Buffer pKa:", value = 14,
+                                                 min = 0, max = 14, step = 0.1))
+                        ),
+                        fluidRow(
+                          column(6, numericInput("DYH", "DYH [cm²/s]:", value = 1.8E-5,
+                                                 min = 0, step = 1e-6)),
+                          column(6, numericInput("DX", "DX [cm²/s]:", value = 1.2E-5,
+                                                 min = 0, step = 1e-6))
+                        ),
+                        
+                        h3("API properties"),
+                        numericInput("DAPI", "Diffusion coefficient of API [cm²/s]:", value = 6.7E-6,
+                                     min = 0, step = 1e-7),
+                        numericInput("S0", "Intrinsic solubility [M]:", value = 6.7E-6,
+                                     min = 0, step = 1e-7),
+                        
+                        fluidRow(
+                          column(6, selectInput("Salt", "Salt:", 
+                                                choices = list("No" = 0),
+                                                selected = 0)),
+                          column(6, numericInput("Ksp", "Salt solubility product [M²]:", value = 1.5E-1,
+                                                 min = 0, step = 0.01))
+                        ),
+                        
+                        actionButton("calc_pH", "Calculate Surface pH", class = "btn-primary")
+                      ),
+                      mainPanel(
+                        conditionalPanel(
+                          condition = "input.calc_pH > 0 && $('html').hasClass('shiny-busy')",
+                          div(
+                            style = "color: #00008B; text-align: center; padding: 20px;",
+                            h3(icon("spinner", class = "fa-spin"), "Surface pH is being calculated...")
+                          )
+                        ),
+                        plotOutput("surface_pH_plot")
+                      )
              )
   )
 )
@@ -176,6 +249,7 @@ ui <- fluidPage(
 #### Server for solubility fittings ----
 server <- function(input, output, session) {
   
+  calc_status <- reactiveVal(TRUE)
   vals <- reactiveValues(p1=NULL,p2=NULL,p3=NULL,p4=NULL,p5=NULL)
   
   # Specify input data once, using observe() wrapper
@@ -204,7 +278,7 @@ server <- function(input, output, session) {
     IE.Ki    <- input$IE.Ki
     C.H2O    <- 55.56 # Temperature dependent
     
-    # Load observed aqueous & biorelevant solubilities:
+    # Load observed aqueous & biorelevant solubility data:
     req(input$obs.file)
     obs.aq  <- read.xlsx(input$obs.file$datapath,sheet="Observed.Aqueous")
     obs.aq  <- data.frame(apply(obs.aq,MARGIN = 2,trimws,"both"),stringsAsFactors = FALSE)
@@ -264,7 +338,7 @@ server <- function(input, output, session) {
     # Estimate SG and intrinsic solubility using nls() function and observed data and generate output
     output$SG.tab <- renderTable({
       SG.Est.f()$t
-      })
+    })
     
     output$downloadAQpred <- downloadHandler(
       filename = "AqSol.xlsx",
@@ -433,7 +507,210 @@ server <- function(input, output, session) {
         
       }, height = 500, width = 1000)  # Adjusted width to accommodate two plots
     })
+    
 
+    # Surface pH calculations
+    surface_ph_data <- eventReactive(input$calc_pH, {
+      
+      calc_status(FALSE)
+      
+      result_df <- data.frame(pH = numeric(), 
+                              Hsurf = numeric(), 
+                              pHsurf = numeric(), 
+                              Heq = numeric(), 
+                              pHeq = numeric(),
+                              Hsurfu = numeric(), 
+                              pHsurfu = numeric(), 
+                              Hequ = numeric(), 
+                              pHequ = numeric())
+      
+      CT0_num <- as.numeric(input$CT0)
+      CT1_num <- 0  # For monoprotic compounds
+      CT2_num <- 0  # For monoprotic compounds
+      BT_num <- as.numeric(input$BT)
+      BcarB_num <- as.numeric(input$BcarB)
+      Salt_num <- as.numeric(input$Salt)
+      
+      ZH <- ZBH <- ZYH <- 1
+      ZOH <- ZA <- ZX <- -1
+      
+      # Bisection method
+      Bisection <- function(f, a = 0, b = 1, n = 1000, tol = 1e-16) {
+        if (!(f(a) < 0) && (f(b) > 0)) {
+          stop('The root does not exist within this interval')
+        } else if (!(f(a) > 0) && (f(b) < 0)) {
+          stop('The root does not exist within this interval')
+        }
+        for (i in 1:n) {
+          c <- (a + b) / 2
+          if ((f(c) == 0) || ((b - a) / 2) < tol) {
+            return(c)
+          }
+          ifelse(sign(f(c)) == sign(f(a)), 
+                 a <- c,
+                 b <- c)
+        }
+        print('Too many iterations')
+      }
+      
+      # Loop through pH values
+      for (pH in seq(0.1, 14, by = 0.1)) {
+        
+        # Charge Flux Neutrality equation for buffered solutions:
+        f.CFN <- function(Hsurf) {
+          Hh   <- 10^(-pH)
+          KaHX <- 10^(-pH)
+          KaYH <- 10^(-input$pKaYH)
+          
+          ( ZH*input$DH*Hsurf + 
+              ZBH*input$DAPI*BHsurf.f(CT0_num,CT1_num,CT2_num,input$pKa0,Salt_num,Hsurf,input$S0) + 
+              ZYH*input$DYH*CYT.f(BT_num,input$C_buffer,BcarB_num,pH,input$Kw,input$pKaYH)/(1+KaYH/Hsurf) ) +
+            ( ZOH*input$DOH*input$Kw/Hsurf + 
+                ZA*input$DAPI*Asurf.f(CT0_num,CT1_num,CT2_num,input$pKa0,Salt_num,Hsurf,input$S0) + 
+                ZX*input$DX*CXT.f(BT_num,input$C_buffer,BcarB_num,pH,input$Kw,input$pKaYH)/(1+Hsurf/KaHX) ) -
+            ( ZH*input$DH*Hh + 
+                ZYH*input$DYH*CYT.f(BT_num,input$C_buffer,BcarB_num,pH,input$Kw,input$pKaYH)/(1+KaYH/Hh) ) - 
+            ( ZOH*input$DOH*input$Kw/Hh + 
+                ZX*input$DX*CXT.f(BT_num,input$C_buffer,BcarB_num,pH,input$Kw,input$pKaYH)/(1+Hh/KaHX) )
+        }
+        
+        # Electroneutrality equation for buffered solutions:
+        f.ECN <- function(Heq) {
+          Hh   <- 10^(-pH)
+          KaHX <- 10^(-pH)
+          KaYH <- 10^(-input$pKaYH)
+          
+          ( ZH*Heq + 
+              ZBH*BHeq.f(CT0_num,CT1_num,CT2_num,input$pKa0,Salt_num,Heq,input$S0) + 
+              ZYH*CYT.f(BT_num,input$C_buffer,BcarB_num,pH,input$Kw,input$pKaYH)/(1+KaYH/Heq) ) + 
+            ( ZOH*input$Kw/Heq + 
+                ZA*Aeq.f(CT0_num,CT1_num,CT2_num,input$pKa0,Salt_num,Heq,input$S0) + 
+                ZX*CXT.f(BT_num,input$C_buffer,BcarB_num,pH,input$Kw,input$pKaYH)/(1+Heq/KaHX) )
+        }
+        
+        # Charge Flux Neutrality equation for unbuffered solutions:
+        f.CFNu <- function(Hsurf) {
+          Hh   <- 10^(-pH)
+          KaHX <- 10^(-pH)
+          KaYH <- 10^(-input$pKaYH)
+          
+          ( ZH*input$DH*Hsurf + 
+              ZBH*input$DAPI*BHsurf.f(CT0_num,CT1_num,CT2_num,input$pKa0,Salt_num,Hsurf,input$S0) + 
+              ZYH*input$DYH*CYTu.f(pH,input$Kw,input$pKaYH)/(1+KaYH/Hsurf) ) +
+            ( ZOH*input$DOH*input$Kw/Hsurf + 
+                ZA*input$DAPI*Asurf.f(CT0_num,CT1_num,CT2_num,input$pKa0,Salt_num,Hsurf,input$S0) + 
+                ZX*input$DX*CXTu.f(pH)/(1+Hsurf/KaHX) ) -
+            ( ZH*input$DH*Hh + 
+                ZYH*input$DYH*CYTu.f(pH,input$Kw,input$pKaYH)/(1+KaYH/Hh) ) - 
+            ( ZOH*input$DOH*input$Kw/Hh + 
+                ZX*input$DX*CXTu.f(pH)/(1+Hh/KaHX) )
+        }
+        
+        # Electroneutrality equation for unbuffered solutions:
+        f.ECNu <- function(Heq) {
+          Hh   <- 10^(-pH)
+          KaHX <- 10^(-pH)
+          KaYH <- 10^(-input$pKaYH)
+          
+          ( ZH*Heq + 
+              ZBH*BHeq.f(CT0_num,CT1_num,CT2_num,input$pKa0,Salt_num,Heq,input$S0) + 
+              ZYH*CYTu.f(pH,input$Kw,input$pKaYH)/(1+KaYH/Heq) ) + 
+            ( ZOH*input$Kw/Heq + 
+                ZA*Aeq.f(CT0_num,CT1_num,CT2_num,input$pKa0,Salt_num,Heq,input$S0) + 
+                ZX*CXTu.f(pH)/(1+Heq/KaHX) )
+        }
+        
+        # Calculate roots
+        tryCatch({
+          # Find the root for each pH value
+          root <- Bisection(f = f.CFN, 0, 1)
+          ubrt <- Bisection(f = f.CFNu, 0, 1)
+          eqrt <- Bisection(f = f.ECN, 0, 1)
+          ueqr <- Bisection(f = f.ECNu, 0, 1)
+          
+          # Append the result to the data frame
+          result_df <- rbind(result_df, 
+                             data.frame(pH = pH, 
+                                        Hsurf = root, 
+                                        pHsurf = -log10(root), 
+                                        Heq = eqrt, 
+                                        pHeq = -log10(eqrt), 
+                                        Hsurfu = ubrt, 
+                                        pHsurfu = -log10(ubrt), 
+                                        Hequ = ueqr, 
+                                        pHequ = -log10(ueqr)))
+        }, error = function(e) {
+          message("Error at pH ", pH, ": ", e$message)
+        })
+      }
+      # Set calculation status to TRUE when finished
+      calc_status(TRUE)
+      
+      return(result_df)
+    })
+    
+    observe({
+      if(!calc_status()) {
+        shinyjs::disable("calc_pH")
+      } else {
+        shinyjs::enable("calc_pH")
+      }
+    })
+    
+    # Generate the plot
+    output$surface_pH_plot <- renderPlot({
+      req(surface_ph_data())
+
+      ggplot() +
+        theme(
+          axis.line = element_line(colour = "black", linewidth = .5, linetype = "solid"),
+          rect = element_rect(fill = "white", colour = "black", linewidth = .5, linetype = 1),
+          
+          axis.text = element_text(size = 14),
+          axis.title = element_text(size = 16, face = "bold"),
+          
+          panel.background = element_rect(fill = "white", colour = "white", linewidth = 0.5, linetype = "solid"),
+          panel.grid.major = element_line(linewidth = 0.25, linetype = 'solid', colour = "grey90"),
+          panel.grid.minor = element_line(linewidth = 0.25, linetype = 'solid', colour = "grey90"),
+          
+          legend.key = element_rect(fill = "white"),
+          legend.background = element_rect(linewidth = 0.5, linetype = 'solid', color = 'black'),
+          legend.text = element_text(size = 10),
+          legend.position = "bottom",
+          legend.box = "horizontal",
+          
+          plot.title = element_text(size = 18, face = "bold", hjust = 0.5),
+          plot.margin = unit(c(.4, .4, .2, .5), 'cm'),
+          
+          aspect.ratio = 1
+        ) +
+        
+        geom_abline(slope = 1, intercept = 0, linewidth = 0.75, linetype = "solid", color = "gray50") +
+        geom_line(data = result_df, aes(x = pH, y = pHsurf, color = "Surface pH (buffered)"), linewidth = 1, linetype = "solid") +
+        geom_line(data = result_df, aes(x = pH, y = pHsurfu, color = "Surface pH (unbuffered)"), linewidth = 1, linetype = "dashed") +
+        geom_line(data = result_df, aes(x = pH, y = pHeq, color = "Equilibrium pH (buffered)"), linewidth = 1, linetype = "dotdash") +
+        geom_line(data = result_df, aes(x = pH, y = pHequ, color = "Equilibrium pH (unbuffered)"), linewidth = 1, linetype = "longdash") +
+        
+        scale_x_continuous(limits = c(0, 14), n.breaks = 8) +
+        scale_y_continuous(limits = c(0, 14), n.breaks = 8) +
+        
+        scale_color_manual(values = c("Surface pH (buffered)" = "#482173",
+                                      "Surface pH (unbuffered)" = "#2e6f8e",
+                                      "Equilibrium pH (buffered)" = "#29af7f",
+                                      "Equilibrium pH (unbuffered)" = "#bddf26"),
+                           breaks = c("Surface pH (buffered)", 
+                                      "Surface pH (unbuffered)", 
+                                      "Equilibrium pH (buffered)", 
+                                      "Equilibrium pH (unbuffered)")) +
+        
+        guides(color = guide_legend(ncol = 2)) +
+        
+        labs(title = paste("Surface and equilibrium pH for", name),  
+             x = "Initial or bulk pH",
+             y = "Equilibrium or surface pH",
+             color = NULL)
+    }, height = 750)
+    
     output$downloadAQreport = downloadHandler(
       filename = function() {"AQreport.pdf"},
       content = function(file) {
@@ -451,8 +728,8 @@ server <- function(input, output, session) {
         dev.off()
       }
     )
-    
   })
+  
 }
 
 #### Shiny app ----

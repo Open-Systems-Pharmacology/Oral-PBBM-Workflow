@@ -530,3 +530,342 @@ plot.RES.bs.br.f <- function (obs.br) {
 }
 
 
+#### Surface pH Functions ####
+
+### Equilibrium Functions ###
+
+# Calculate equilibrium concentration of ionized species A-
+Aeq.f <- function(CT0, CT1, CT2, pKa0, Salt, Heq, S0) {
+  if (!is.numeric(S0) || S0 <= 0) {
+    stop("S0 must be a positive numeric value")
+  }
+  if (!is.numeric(Heq)) {
+    stop("Heq must be numeric")
+  }
+  if (Heq <= 0) {
+    Heq <- 1e-14  # Set to a very small positive number instead of throwing error
+  }
+  
+  tryCatch({
+    if (CT0 == 0) {
+      stop("Not applicable to neutral APIs")
+    } else if (CT0 < 0 && CT1 == 0 && CT2 == 0 && Salt == 0) {
+      Aeq <- ((10^(-pKa0)/Heq) * S0)
+    } else if (CT0 > 0 && CT1 == 0 && CT2 == 0 && Salt == 0) {
+      Aeq <- 0
+    } else {
+      stop("Invalid combination of parameters")
+    }
+    return(Aeq)
+  }, error = function(e) {
+    stop(paste("Error in Aeq calculation:", e$message))
+  })
+}
+
+
+# Calculate equilibrium concentration of protonated species BH+
+BHeq.f <- function(CT0, CT1, CT2, pKa0, Salt, Heq, S0) {
+  if (!is.numeric(S0) || S0 <= 0) {
+    stop("S0 must be a positive numeric value")
+  }
+  if (!is.numeric(Heq)) {
+    stop("Heq must be numeric")
+  }
+  if (Heq <= 0) {
+    Heq <- 1e-14  # Set to a very small positive number instead of throwing error
+  }
+  
+  tryCatch({
+    if (CT0 == 0) {
+      stop("Not applicable to neutral APIs")
+    } else if (CT0 < 0 && CT1 == 0 && CT2 == 0 && Salt == 0) {
+      BHeq <- 0
+    } else if (CT0 > 0 && CT1 == 0 && CT2 == 0 && Salt == 0) {
+      BHeq <- (Heq/10^(-pKa0)) * S0
+    } else {
+      stop("Invalid combination of parameters")
+    }
+    return(BHeq)
+  }, error = function(e) {
+    stop(paste("Error in BHeq calculation:", e$message))
+  })
+}
+
+
+# Calculate equilibrium concentration of neutral species HA
+HAeq.f <- function(CT0, CT1, CT2, pKa0, Salt, Heq, S0) {
+  if (!is.numeric(S0) || S0 <= 0) {
+    stop("S0 must be a positive numeric value")
+  }
+  if (!is.numeric(Heq)) {
+    stop("Heq must be numeric")
+  }
+  if (Heq <= 0) {
+    Heq <- 1e-14  # Set to a very small positive number instead of throwing error
+  }
+  
+  tryCatch({
+    if (CT0 == 0) {
+      stop("Not applicable to neutral APIs")
+    } else if (CT0 < 0 && CT1 == 0 && CT2 == 0 && Salt == 0) {
+      HAeq <- S0
+    } else if (CT0 > 0 && CT1 == 0 && CT2 == 0 && Salt == 0) {
+      HAeq <- 0
+    } else {
+      stop("Invalid combination of parameters")
+    }
+    return(HAeq)
+  }, error = function(e) {
+    stop(paste("Error in HAeq calculation:", e$message))
+  })
+}
+
+# Calculate equilibrium concentration of neutral species B
+Beq.f <- function(CT0, CT1, CT2, pKa0, Salt, Heq, S0) {
+  if (!is.numeric(S0) || S0 <= 0) {
+    stop("S0 must be a positive numeric value")
+  }
+  if (!is.numeric(Heq)) {
+    stop("Heq must be numeric")
+  }
+  if (Heq <= 0) {
+    Heq <- 1e-14  # Set to a very small positive number instead of throwing error
+  }
+  
+  tryCatch({
+    if (CT0 == 0) {
+      stop("Not applicable to neutral APIs")
+    } else if (CT0 < 0 && CT1 == 0 && CT2 == 0 && Salt == 0) {
+      Beq <- 0
+    } else if (CT0 > 0 && CT1 == 0 && CT2 == 0 && Salt == 0) {
+      Beq <- S0
+    } else {
+      stop("Invalid combination of parameters")
+    }
+    return(Beq)
+  }, error = function(e) {
+    stop(paste("Error in Beq calculation:", e$message))
+  })
+}
+
+
+### Surface Functions ###
+
+# Calculate surface concentration of ionized species A-
+Asurf.f <- function(CT0, CT1, CT2, pKa0, Salt, Hsurf, S0) {
+  if (!is.numeric(S0) || S0 <= 0) {
+    stop("S0 must be a positive numeric value")
+  }
+  
+  tryCatch({
+    if (CT0 == 0) {
+      stop("Not applicable to neutral APIs")
+    } else if (CT0 < 0 && CT1 == 0 && CT2 == 0 && Salt == 0) {
+      Asurf <- ((10^(-pKa0)/Hsurf) * S0)
+    } else if (CT0 > 0 && CT1 == 0 && CT2 == 0 && Salt == 0) {
+      Asurf <- 0
+    } else {
+      stop("Invalid combination of parameters")
+    }
+    return(Asurf)
+  }, error = function(e) {
+    stop(paste("Error in Asurf calculation:", e$message))
+  })
+}
+
+
+# Calculate surface concentration of protonated species BH+
+BHsurf.f <- function(CT0, CT1, CT2, pKa0, Salt, Hsurf, S0) {
+  if (!is.numeric(S0) || S0 <= 0) {
+    stop("S0 must be a positive numeric value")
+  }
+  
+  tryCatch({
+    if (CT0 == 0) {
+      stop("Not applicable to neutral APIs")
+    } else if (CT0 < 0 && CT1 == 0 && CT2 == 0 && Salt == 0) {
+      BHsurf <- 0
+    } else if (CT0 > 0 && CT1 == 0 && CT2 == 0 && Salt == 0) {
+      BHsurf <- (Hsurf/10^(-pKa0)) * S0
+    } else {
+      stop("Invalid combination of parameters")
+    }
+    return(BHsurf)
+  }, error = function(e) {
+    stop(paste("Error in BHsurf calculation:", e$message))
+  })
+}
+
+
+# Calculate surface concentration of neutral species HA
+HAsurf.f <- function(CT0, CT1, CT2, pKa0, Salt, Hsurf, S0) {
+  if (!is.numeric(S0) || S0 <= 0) {
+    stop("S0 must be a positive numeric value")
+  }
+  
+  tryCatch({
+    if (CT0 == 0) {
+      stop("Not applicable to neutral APIs")
+    } else if (CT0 < 0 && CT1 == 0 && CT2 == 0 && Salt == 0) {
+      HAsurf <- S0
+    } else if (CT0 > 0 && CT1 == 0 && CT2 == 0 && Salt == 0) {
+      HAsurf <- 0
+    } else {
+      stop("Invalid combination of parameters")
+    }
+    return(HAsurf)
+  }, error = function(e) {
+    stop(paste("Error in HAsurf calculation:", e$message))
+  })
+}
+
+
+# Calculate surface concentration of neutral species B
+Bsurf.f <- function(CT0, CT1, CT2, pKa0, Salt, Hsurf, S0) {
+  if (!is.numeric(S0) || S0 <= 0) {
+    stop("S0 must be a positive numeric value")
+  }
+  
+  tryCatch({
+    if (CT0 == 0) {
+      stop("Not applicable to neutral APIs")
+    } else if (CT0 < 0 && CT1 == 0 && CT2 == 0 && Salt == 0) {
+      Bsurf <- 0
+    } else if (CT0 > 0 && CT1 == 0 && CT2 == 0 && Salt == 0) {
+      Bsurf <- S0
+    } else {
+      stop("Invalid combination of parameters")
+    }
+    return(Bsurf)
+  }, error = function(e) {
+    stop(paste("Error in Bsurf calculation:", e$message))
+  })
+}
+
+
+### Buffer Functions ###
+
+# Calculate buffer component concentration CXT
+CXT.f <- function(BT, C.buffer, BcarB, pH, Kw, pKaYH) {
+  if (!is.numeric(BT) || !BT %in% c(-1, 0, 1)) {
+    stop("Buffer type (BT) must be -1 (acid), 0 (unbuffered), or 1 (base)")
+  }
+  if (!is.numeric(C.buffer) || C.buffer < 0) {
+    stop("Buffer concentration must be non-negative")
+  }
+  if (BcarB != 0) {
+    stop("Bicarbonate buffer systems are not yet implemented")
+  }
+  if (!is.numeric(pH) || pH < 0 || pH > 14) {
+    stop("pH must be between 0 and 14")
+  }
+  if (!is.numeric(Kw) || Kw <= 0) {
+    stop("Kw must be a positive numeric value")
+  }
+  if (!is.numeric(pKaYH) || pKaYH < 0 || pKaYH > 14) {
+    stop("Buffer pKa must be between 0 and 14")
+  }
+  
+  tryCatch({
+    Hh <- 10^(-pH)
+    KaHX <- 10^(-pH)  # Assumption Uekusa
+    KaYH <- 10^(-pKaYH)
+    
+    CXT <- if (BT < 0 && C.buffer > 0 && BcarB == 0) {
+      C.buffer
+    } else if (BT > 0 && C.buffer > 0 && BcarB == 0) {
+      (Hh - Kw/Hh + CYT.f(BT, C.buffer, BcarB, pH, Kw, pKaYH)/(1 + KaYH/Hh)) * (1 + Hh/KaHX)
+    } else if (C.buffer == 0 && pH > 7) {
+      0
+    } else if (C.buffer == 0 && pH <= 7) {
+      Hh * (1 + Hh/KaHX)
+    } else {
+      stop("Invalid combination of buffer parameters")
+    }
+    
+    return(CXT)
+  }, error = function(e) {
+    stop(paste("Error in CXT calculation:", e$message))
+  })
+}
+
+
+# Calculate buffer component concentration CYT
+CYT.f <- function(BT, C.buffer, BcarB, pH, Kw, pKaYH) {
+  if (!is.numeric(Kw) || Kw <= 0) {
+    stop("Kw must be a positive numeric value")
+  }
+  if (!is.numeric(pKaYH) || pKaYH < 0 || pKaYH > 14) {
+    stop("pKaYH must be between 0 and 14")
+  }
+  
+  tryCatch({
+    Hh <- 10^(-pH)
+    KaHX <- 10^(-pH)  # Assumption Uekusa
+    KaYH <- 10^(-pKaYH)
+    
+    if (BT < 0 && C.buffer > 0 && BcarB == 0) {
+      CYT <- ((Kw/Hh) - Hh + (CXT.f(BT,C.buffer,BcarB,pH,Kw,pKaYH)/(1+(Hh/KaHX)))) * (1+(KaYH/Hh))
+    } else if (BT > 0 && C.buffer > 0 && BcarB == 0) {
+      CYT <- C.buffer
+    } else if (C.buffer > 0 && BcarB > 0) {
+      stop("Bicarbonate buffer to be done")
+    } else if (C.buffer == 0 && pH > 7) {
+      CYT <- (Kw/Hh)*(1+KaYH/Hh)
+    } else if (C.buffer == 0 && pH <= 7) {
+      CYT <- 0
+    } else {
+      stop("Invalid buffer parameters")
+    }
+    return(CYT)
+  }, error = function(e) {
+    stop(paste("Error in CYT calculation:", e$message))
+  })
+}
+
+
+# Calculate unbuffered component concentration CXTu
+CXTu.f <- function(pH) {
+  tryCatch({
+    Hh <- 10^(-pH)
+    KaHX <- 10^(-pH)  # Assumption Uekusa
+    
+    if (pH > 7) {
+      CXT <- 0
+    } else if (pH <= 7) {
+      CXT <- Hh*(1+Hh/KaHX)
+    } else {
+      stop("Invalid pH value")
+    }
+    return(CXT)
+  }, error = function(e) {
+    stop(paste("Error in CXTu calculation:", e$message))
+  })
+}
+
+
+# Calculate unbuffered component concentration CYTu
+CYTu.f <- function(pH, Kw, pKaYH) {
+  if (!is.numeric(Kw) || Kw <= 0) {
+    stop("Kw must be a positive numeric value")
+  }
+  if (!is.numeric(pKaYH) || pKaYH < 0 || pKaYH > 14) {
+    stop("pKaYH must be between 0 and 14")
+  }
+  
+  tryCatch({
+    Hh <- 10^(-pH)
+    KaYH <- 10^(-pKaYH)
+    
+    if (pH > 7) {
+      CYT <- (Kw/Hh)*(1+KaYH/Hh)
+    } else if (pH <= 7) {
+      CYT <- 0
+    } else {
+      stop("Invalid pH value")
+    }
+    return(CYT)
+  }, error = function(e) {
+    stop(paste("Error in CYTu calculation:", e$message))
+  })
+}
