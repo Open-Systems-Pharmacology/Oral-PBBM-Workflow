@@ -22,10 +22,10 @@ ui <- fluidPage(
                           h3(p("API properties")),
                           textInput("API", label = "Active Pharmaceutical Ingredient (API):", value = "Name"),
                           fluidRow(
-                            column(3,autonumericInput("LogP", "LogP:", min=0, max=19, value=0, width = "100px",
-                                                      decimalPlaces = 2,digitGroupSeparator = ",",decimalCharacter = ".")),
-                            column(3, offset = 1,autonumericInput("MW.API", "Mol. Wt.:", min=0, max=1e4, value=1, width = "100px",
-                                                                  decimalPlaces = 2,digitGroupSeparator = ",",decimalCharacter = ".")),
+                            column(3,autonumericInput("LogP", "LogP:", min=-10, max=10, value=0, width = "100px",
+                                                      decimalPlaces = 2, digitGroupSeparator = ",", decimalCharacter = ".")),
+                            column(3, offset = 1,autonumericInput("MW.API", "Mol. Wt.:", min=0, max=1e4, value=250, width = "100px",
+                                                                  decimalPlaces = 2, digitGroupSeparator = ",", decimalCharacter = ".")),
                             column(3, offset = 1,selectInput("MW.unit", "Unit:", choices = c("g/mol"), selected = "g/mol", width = "1000px"))
                           ),br(),
                           
@@ -53,19 +53,19 @@ ui <- fluidPage(
                                  selectInput(inputId = "CT0",label = "pKa1 type :",choices = c("None" = 0, "Acid" = -1, "Base" = 1),
                                              selected = "None", width = "100px"),
                                  autonumericInput("pKa0", "Value (1):", min=0, max=14, value=0, width = "100px",
-                                                  decimalPlaces = 2,digitGroupSeparator = ",",decimalCharacter = ".")
+                                                  decimalPlaces = 2, digitGroupSeparator = ",", decimalCharacter = ".")
                           ),
                           column(3, offset = 1,
                                  selectInput(inputId = "CT1",label = "pKa2 type :",choices = c("None" = 0, "Acid" = -1, "Base" = 1),
                                              selected = "None", width = "100px"),
                                  autonumericInput("pKa1", "Value (2):", min=0, max=14, value=0, width = "100px",
-                                                  decimalPlaces = 2,digitGroupSeparator = ",",decimalCharacter = ".")
+                                                  decimalPlaces = 2, digitGroupSeparator = ",", decimalCharacter = ".")
                           ),
                           column(3, offset = 1,
                                  selectInput(inputId = "CT2",label = "pKa3 type :",choices = c("None" = 0, "Acid" = -1, "Base" = 1),
                                              selected = "None", width = "100px"),
                                  autonumericInput("pKa2", "Value (3):", min=0, max=14, value=0, width = "100px",
-                                                  decimalPlaces = 2,digitGroupSeparator = ",",decimalCharacter = ".")
+                                                  decimalPlaces = 2, digitGroupSeparator = ",", decimalCharacter = ".")
                           )
                         ),br(),
                         
@@ -73,10 +73,10 @@ ui <- fluidPage(
                         h3(p("Reference solubility for fitting")),
                         fluidRow(
                           column(3,autonumericInput("ref_pH", "Ref. pH:", min=0, max=14, value=7, width = "100px",
-                                                    decimalPlaces = 2,digitGroupSeparator = ",",decimalCharacter = ".")
+                                                    decimalPlaces = 2, digitGroupSeparator = ",", decimalCharacter = ".")
                           ),
-                          column(3, offset = 1,autonumericInput("ref_sol", "Solubility:", min=0, max=14, value=0, width = "100px",
-                                                                decimalPlaces = 4,digitGroupSeparator = ",",decimalCharacter = ".")
+                          column(3, offset = 1,autonumericInput("ref_sol", "Solubility:", min=0, max=1e6, value=0, width = "130px",
+                                                                decimalPlaces = 7, digitGroupSeparator = ",", decimalCharacter = ".")
                           ),
                           column(3, offset = 1,selectInput(inputId = "ref_unit",label = "Unit:", choices = c("mg/ml","ug/ml","ng/ml","pg/ml",
                                                                                                              "g/l","mg/l","ug/l","ng/l","pg/l",
@@ -87,8 +87,17 @@ ui <- fluidPage(
                         ),br(),
                         
                         fluidRow(  
-                          column(7,autonumericInput("SG_I", "Initial Solubility Gain per charge:", min=1, max=1000000, value=1000, width = "235px",
-                                                    decimalPlaces = 2,digitGroupSeparator = ",",decimalCharacter = ".")
+                          column(7,autonumericInput("SG_I", "Solubility Gain per charge:", min=1, max=1e6, value=1000, width = "130px",
+                                                    decimalPlaces = 2, digitGroupSeparator = ",", decimalCharacter = ".")
+                          )
+                        ),
+                        
+                        # Optimization Scale option
+                        fluidRow(
+                          column(6,
+                                 radioButtons("sg_fit_scale", "Optimization Scale:",
+                                              choices = list("Linear" = "linear", "Logarithmic" = "log"),
+                                              selected = "linear")
                           )
                         ),
                         
@@ -118,10 +127,10 @@ ui <- fluidPage(
                         em(textOutput("Ki.IE.txt")),br(),
                         fluidRow(
                           column(3,autonumericInput("int_pH", "pH (intrinsic):", min=0, max=14, value=0, width = "100px",
-                                                    decimalPlaces = 2,digitGroupSeparator = ",",decimalCharacter = ".")
+                                                    decimalPlaces = 2, digitGroupSeparator = ",", decimalCharacter = ".")
                           ),
-                          column(3, offset = 1,autonumericInput("int_sol", "Intrinsic Sol.:", min=0, max=14, value=0, width = "100px",
-                                                                decimalPlaces = 6,digitGroupSeparator = ",",decimalCharacter = ".")
+                          column(3, offset = 1,autonumericInput("int_sol", "Intrinsic Sol.:", min=0, max=1e4, value=0, width = "130px",
+                                                                decimalPlaces = 8, digitGroupSeparator = ",", decimalCharacter = ".")
                           ),
                           column(3, offset = 1,selectInput(inputId = "int_unit",label = "Unit:", choices = c("mg/ml","ug/ml","ng/ml","pg/ml",
                                                                                                              "g/l","mg/l","ug/l","ng/l","pg/l",
@@ -132,19 +141,33 @@ ui <- fluidPage(
                         ),
                         
                         em(textOutput("IntS.txt")),br(),
+                        
+                        # Optimization Scale option:
+                        fluidRow(
+                          column(6,
+                                 radioButtons("fit_scale", "Optimization Scale:",
+                                              choices = list("Linear" = "linear", "Logarithmic" = "log"),
+                                              selected = "linear")
+                          )
+                        ),
+                        
                         fluidRow(  
                           column(3, actionButton("Kfit", "Estimate Km:w")),
                           column(3, offset = 0.5, downloadButton("downloadBRpred", "Export tables")),
                           column(3, offset = 0.5, downloadButton("downloadBRreport", "Export plots"))
                         ), br()
                       ),
+                      
                       mainPanel(h4(p("Upload observed solubility data and input the API properties, then press 'Estimate Km:w' 
                                      in order to fit the micelle partitioning coefficient(s) to your data")),
                                 tableOutput("K.tab"),
                                 h5(p(textOutput("CopyPasteK"))),
-                                uiOutput("updateK"),
-                                plotOutput(outputId = "KpHRes"),
-                                plotOutput(outputId = "KbsRes")
+                                fluidRow(
+                                  column(3, uiOutput("updateK")),
+                                  column(3, offset = 1, uiOutput("plotPredObs"))
+                                ),                                plotOutput(outputId = "KpHRes"),
+                                plotOutput(outputId = "KbsRes"),
+                                plotOutput(outputId = "predicted_vs_observed_bs")
                       )
              )
   )
@@ -153,7 +176,7 @@ ui <- fluidPage(
 #### Server for solubility fittings ----
 server <- function(input, output, session) {
   
-  vals <- reactiveValues(p1=NULL,p2=NULL,p3=NULL,p4=NULL)
+  vals <- reactiveValues(p1=NULL,p2=NULL,p3=NULL,p4=NULL,p5=NULL)
   
   # Specify input data once, using observe() wrapper
   observe({
@@ -303,6 +326,9 @@ server <- function(input, output, session) {
       output$updateK <- renderUI({
         actionButton("updateK", label = "Plot Residuals")
       })
+      output$plotPredObs <- renderUI({
+        actionButton("plotPredObs", label = "Plot Predicted vs. Observed")
+      })
     })
     
     observeEvent(input$updateK, {
@@ -310,13 +336,104 @@ server <- function(input, output, session) {
         obs.br <- S.ion.f(obs.br)
         obs.br <- Pred.br.f(obs.br)
         obs.br$Ln.RES <- log(obs.br$Pred.br)-log(obs.br$BR.S_mg.ml)
-        ptlist <- list(plot.RES.pH.br.f(obs.br),plot.RES.bs.br.f(obs.br))
         vals$p3 <- plot.RES.pH.br.f(obs.br)
         vals$p4 <- plot.RES.bs.br.f(obs.br)
-        grid.arrange(grobs=ptlist,ncol=length(ptlist))
+        grid.arrange(grobs=list(vals$p3, vals$p4), ncol=2)
       })
     })
     
+    observeEvent(input$plotPredObs, {
+      output$predicted_vs_observed_bs <- renderPlot({
+        obs.br <- S.ion.f(obs.br)
+        obs.br <- Pred.br.f(obs.br)
+        
+        max_value <- max(max(obs.br$BR.S_mg.ml, na.rm = TRUE), 
+                         max(obs.br$Pred.br, na.rm = TRUE))
+        min_value <- min(min(obs.br$BR.S_mg.ml[obs.br$BR.S_mg.ml > 0], na.rm = TRUE), 
+                         min(obs.br$Pred.br[obs.br$Pred.br > 0], na.rm = TRUE))
+        
+        # linear scale plot:
+        p1 <- ggplot(obs.br, aes(x = BR.S_mg.ml, y = Pred.br)) +
+          theme(
+            axis.line = element_line(colour = "black", linewidth = 1, linetype = "solid"),
+            rect = element_rect(fill = "white", colour = "black", linewidth = 0.5, linetype = 1),
+            
+            axis.text=element_text(size=14),
+            axis.title=element_text(size=16,face="bold"),
+            
+            panel.background = element_rect(fill = "white", colour = "white", linewidth = 0.5, linetype = "solid"),
+            panel.grid.major = element_line(linewidth = 0.5, linetype = 'solid', colour = "lightgray"),
+            panel.grid.minor = element_line(linewidth = 0.25, linetype = 'solid', colour = "lightgray"),
+            
+            legend.key = element_rect(fill = "white"),
+            
+            plot.title = element_text(size = 18, face = "bold", hjust = 0.5),
+            plot.subtitle = element_text(size = 16,hjust = 0.5),
+            plot.margin=unit(c(.4,.4,.2,.5), 'cm'),
+            
+            # Ensure the plot panel is square
+            aspect.ratio = 1
+          ) +
+          
+          geom_point(size=3, stroke = 0.5, color = "blue") +
+          geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "red") +
+          
+          # Set identical limits and breaks for both axes
+          scale_x_continuous(limits = c(0, max_value * 1.1), 
+                             expand = c(0, 0)) +
+          scale_y_continuous(limits = c(0, max_value * 1.1),
+                             expand = c(0, 0)) +
+          
+          labs(title = "Predicted vs Observed Biorelevant Solubility",
+               subtitle = paste0(API, " (Linear Scale)"),
+               x = "Observed Biorelevant Solubility (mg/mL)",
+               y = "Predicted Biorelevant Solubility (mg/mL)")
+        
+        # log scale plot:
+        p2 <- ggplot(obs.br, aes(x = BR.S_mg.ml, y = Pred.br)) +
+          theme(
+            axis.line = element_line(colour = "black", linewidth = 1, linetype = "solid"),
+            rect = element_rect(fill = "white", colour = "black", linewidth = 0.5, linetype = 1),
+            
+            axis.text=element_text(size=14),
+            axis.title=element_text(size=16,face="bold"),
+            
+            panel.background = element_rect(fill = "white", colour = "white", linewidth = 0.5, linetype = "solid"),
+            panel.grid.major = element_line(linewidth = 0.5, linetype = 'solid', colour = "lightgray"),
+            panel.grid.minor = element_line(linewidth = 0.25, linetype = 'solid', colour = "lightgray"),
+            
+            legend.key = element_rect(fill = "white"),
+            
+            plot.title = element_text(size = 18, face = "bold", hjust = 0.5),
+            plot.subtitle = element_text(size = 16,hjust = 0.5),
+            plot.margin=unit(c(.4,.4,.2,.5), 'cm'),
+            
+            # Ensure the plot panel is square
+            aspect.ratio = 1
+          ) +
+          
+          geom_point(size=3, stroke = 0.5, color = "blue") +
+          geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "red") +
+          
+          # Set log scales with identical limits
+          scale_x_log10(limits = c(min_value * 0.9, max_value * 1.1)) +
+          scale_y_log10(limits = c(min_value * 0.9, max_value * 1.1)) +
+          
+          labs(title = "Predicted vs Observed Biorelevant Solubility",
+               subtitle = paste0(API, " (Log Scale)"),
+               x = "Observed Biorelevant Solubility (mg/mL)",
+               y = "Predicted Biorelevant Solubility (mg/mL)")
+        
+        # Store plots in reactive values
+        vals$p5 <- p1
+        vals$p6 <- p2
+        
+        # Arrange plots side by side
+        grid.arrange(p1, p2, ncol=2)
+        
+      }, height = 500, width = 1000)  # Adjusted width to accommodate two plots
+    })
+
     output$downloadAQreport = downloadHandler(
       filename = function() {"AQreport.pdf"},
       content = function(file) {
@@ -330,7 +447,7 @@ server <- function(input, output, session) {
       filename = function() {"BRreport.pdf"},
       content = function(file) {
         pdf(file, onefile = TRUE)
-        grid.arrange(vals$p3,vals$p4) 
+        grid.arrange(vals$p3,vals$p4,vals$p5,vals$p6, ncol=2) 
         dev.off()
       }
     )

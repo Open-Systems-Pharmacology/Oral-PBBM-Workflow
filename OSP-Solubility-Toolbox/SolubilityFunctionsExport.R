@@ -202,31 +202,50 @@ S.int.f <- function(CT0,CT1,CT2,pKa0,pKa1,pKa2,S_ref,ref_pH) {
 }
 
 # SG-estimation algorithm
-base.nlm.f <- function(base.nlm) {
+base.nlm.f <- function(base.nlm, fit_scale = "linear") {
   S.aq.Fit <- obs.aq[, 'aq.S_mg.ml']
   pH.aqf <- obs.aq[, 'pH.final']
-  base.nlm <- nls(S.aq.Fit ~ (S_ref *
-                                (((ifelse(CT0 != 0, 1/(1+10^(CT0*(pKa0-ref_pH))), 1)*ifelse(CT1 != 0, 1/(1+10^(CT1*(pKa1-ref_pH))), 1)*ifelse(CT2 != 0, 1/(1+10^(CT2*(pKa2-ref_pH))), 1))+
-                                    ((1-ifelse(CT0 != 0, 1/(1+10^(CT0*(pKa0-ref_pH))), 1))*ifelse(CT1 != 0, 1/(1+10^(CT1*(pKa1-ref_pH))), 1)*ifelse(CT2 != 0, 1/(1+10^(CT2*(pKa2-ref_pH))), 1))/base^(CT0^2)+
-                                    (ifelse(CT0 != 0, 1/(1+10^(CT0*(pKa0-ref_pH))), 1)*(1-ifelse(CT1 != 0, 1/(1+10^(CT1*(pKa1-ref_pH))), 1))*ifelse(CT2 != 0, 1/(1+10^(CT2*(pKa2-ref_pH))), 1))/base^(CT1^2)+
-                                    (ifelse(CT0 != 0, 1/(1+10^(CT0*(pKa0-ref_pH))), 1)*ifelse(CT1 != 0, 1/(1+10^(CT1*(pKa1-ref_pH))), 1)*(1-ifelse(CT2 != 0, 1/(1+10^(CT2*(pKa2-ref_pH))), 1)))/base^(CT2^2)+
-                                    ((1-ifelse(CT0 != 0, 1/(1+10^(CT0*(pKa0-ref_pH))), 1))*(1-ifelse(CT1 != 0, 1/(1+10^(CT1*(pKa1-ref_pH))), 1))*ifelse(CT2 != 0, 1/(1+10^(CT2*(pKa2-ref_pH))), 1))/base^max(CT0+CT1,-CT0-CT1)+
-                                    ((1-ifelse(CT0 != 0, 1/(1+10^(CT0*(pKa0-ref_pH))), 1))*ifelse(CT1 != 0, 1/(1+10^(CT1*(pKa1-ref_pH))), 1)*(1-ifelse(CT2 != 0, 1/(1+10^(CT2*(pKa2-ref_pH))), 1)))/base^max(CT0+CT2,-CT0-CT2)+
-                                    (ifelse(CT0 != 0, 1/(1+10^(CT0*(pKa0-ref_pH))), 1)*(1-ifelse(CT1 != 0, 1/(1+10^(CT1*(pKa1-ref_pH))), 1))*(1-ifelse(CT2 != 0, 1/(1+10^(CT2*(pKa2-ref_pH))), 1)))/base^max(CT1+CT2,-CT1-CT2)+
-                                    ((1-ifelse(CT0 != 0, 1/(1+10^(CT0*(pKa0-ref_pH))), 1))*(1-ifelse(CT1 != 0, 1/(1+10^(CT1*(pKa1-ref_pH))), 1))*(1-ifelse(CT2 != 0, 1/(1+10^(CT2*(pKa2-ref_pH))), 1)))/base^max(CT0+CT1+CT2,-CT0-CT1-CT2))
-                                 /
-                                   (
-                                     (if(CT0 != 0){1/(1+10^(CT0*(pKa0-pH.aqf)))}else{1}) * (if(CT1 != 0){1/(1+10^(CT1*(pKa1-pH.aqf)))}else{1}) * (if(CT2 != 0){1/(1+10^(CT2*(pKa2-pH.aqf)))}else{1}) +
-                                       (1-if(CT0 != 0){1/(1+10^(CT0*(pKa0-pH.aqf)))}else{1}) * (if(CT1 != 0){1/(1+10^(CT1*(pKa1-pH.aqf)))}else{1}) * (if(CT2 != 0){1/(1+10^(CT2*(pKa2-pH.aqf)))}else{1})/base^(CT0^2) +
-                                       (if(CT0 != 0){1/(1+10^(CT0*(pKa0-pH.aqf)))}else{1}) * (1-if(CT1 != 0){1/(1+10^(CT1*(pKa1-pH.aqf)))}else{1}) * (if(CT2 != 0){1/(1+10^(CT2*(pKa2-pH.aqf)))}else{1})/base^(CT1^2) +
-                                       (if(CT0 != 0){1/(1+10^(CT0*(pKa0-pH.aqf)))}else{1}) * (if(CT1 != 0){1/(1+10^(CT1*(pKa1-pH.aqf)))}else{1}) * (1-if(CT2 != 0){1/(1+10^(CT2*(pKa2-pH.aqf)))}else{1})/base^(CT2^2) +
-                                       (1-if(CT0 != 0){1/(1+10^(CT0*(pKa0-pH.aqf)))}else{1}) * (1-if(CT1 != 0){1/(1+10^(CT1*(pKa1-pH.aqf)))}else{1}) * (if(CT2 != 0){1/(1+10^(CT2*(pKa2-pH.aqf)))}else{1})/base^max(CT0+CT1,-CT0-CT1)+
-                                       (1-if(CT0 != 0){1/(1+10^(CT0*(pKa0-pH.aqf)))}else{1}) * (if(CT1 != 0){1/(1+10^(CT1*(pKa1-pH.aqf)))}else{1}) * (1-if(CT2 != 0){1/(1+10^(CT2*(pKa2-pH.aqf)))}else{1})/base^max(CT0+CT2,-CT0-CT2)+
-                                       (if(CT0 != 0){1/(1+10^(CT0*(pKa0-pH.aqf)))}else{1}) * (1-if(CT1 != 0){1/(1+10^(CT1*(pKa1-pH.aqf)))}else{1}) * (1-if(CT2 != 0){1/(1+10^(CT2*(pKa2-pH.aqf)))}else{1})/base^max(CT1+CT2,-CT1-CT2)+
-                                       (1-if(CT0 != 0){1/(1+10^(CT0*(pKa0-pH.aqf)))}else{1}) * (1-if(CT1 != 0){1/(1+10^(CT1*(pKa1-pH.aqf)))}else{1}) * (1-if(CT2 != 0){1/(1+10^(CT2*(pKa2-pH.aqf)))}else{1})/base^max(CT0+CT1+CT2,-CT0-CT1-CT2)))),
-                  start = list(base=base), algorithm = "port", lower = 1)
+  
+  # Model formula
+  model_formula <- function(pH, base) {
+    S_ref * (
+      ((ifelse(CT0 != 0, 1/(1+10^(CT0*(pKa0-ref_pH))), 1)*ifelse(CT1 != 0, 1/(1+10^(CT1*(pKa1-ref_pH))), 1)*ifelse(CT2 != 0, 1/(1+10^(CT2*(pKa2-ref_pH))), 1))+
+         ((1-ifelse(CT0 != 0, 1/(1+10^(CT0*(pKa0-ref_pH))), 1))*ifelse(CT1 != 0, 1/(1+10^(CT1*(pKa1-ref_pH))), 1)*ifelse(CT2 != 0, 1/(1+10^(CT2*(pKa2-ref_pH))), 1))/base^(CT0^2)+
+         (ifelse(CT0 != 0, 1/(1+10^(CT0*(pKa0-ref_pH))), 1)*(1-ifelse(CT1 != 0, 1/(1+10^(CT1*(pKa1-ref_pH))), 1))*ifelse(CT2 != 0, 1/(1+10^(CT2*(pKa2-ref_pH))), 1))/base^(CT1^2)+
+         (ifelse(CT0 != 0, 1/(1+10^(CT0*(pKa0-ref_pH))), 1)*ifelse(CT1 != 0, 1/(1+10^(CT1*(pKa1-ref_pH))), 1)*(1-ifelse(CT2 != 0, 1/(1+10^(CT2*(pKa2-ref_pH))), 1)))/base^(CT2^2)+
+         ((1-ifelse(CT0 != 0, 1/(1+10^(CT0*(pKa0-ref_pH))), 1))*(1-ifelse(CT1 != 0, 1/(1+10^(CT1*(pKa1-ref_pH))), 1))*ifelse(CT2 != 0, 1/(1+10^(CT2*(pKa2-ref_pH))), 1))/base^max(CT0+CT1,-CT0-CT1)+
+         ((1-ifelse(CT0 != 0, 1/(1+10^(CT0*(pKa0-ref_pH))), 1))*ifelse(CT1 != 0, 1/(1+10^(CT1*(pKa1-ref_pH))), 1)*(1-ifelse(CT2 != 0, 1/(1+10^(CT2*(pKa2-ref_pH))), 1)))/base^max(CT0+CT2,-CT0-CT2)+
+         (ifelse(CT0 != 0, 1/(1+10^(CT0*(pKa0-ref_pH))), 1)*(1-ifelse(CT1 != 0, 1/(1+10^(CT1*(pKa1-ref_pH))), 1))*(1-ifelse(CT2 != 0, 1/(1+10^(CT2*(pKa2-ref_pH))), 1)))/base^max(CT1+CT2,-CT1-CT2)+
+         ((1-ifelse(CT0 != 0, 1/(1+10^(CT0*(pKa0-ref_pH))), 1))*(1-ifelse(CT1 != 0, 1/(1+10^(CT1*(pKa1-ref_pH))), 1))*(1-ifelse(CT2 != 0, 1/(1+10^(CT2*(pKa2-ref_pH))), 1)))/base^max(CT0+CT1+CT2,-CT0-CT1-CT2))
+      /
+        ((if(CT0 != 0){1/(1+10^(CT0*(pKa0-pH)))}else{1}) * (if(CT1 != 0){1/(1+10^(CT1*(pKa1-pH)))}else{1}) * (if(CT2 != 0){1/(1+10^(CT2*(pKa2-pH)))}else{1}) +
+           (1-if(CT0 != 0){1/(1+10^(CT0*(pKa0-pH)))}else{1}) * (if(CT1 != 0){1/(1+10^(CT1*(pKa1-pH)))}else{1}) * (if(CT2 != 0){1/(1+10^(CT2*(pKa2-pH)))}else{1})/base^(CT0^2) +
+           (if(CT0 != 0){1/(1+10^(CT0*(pKa0-pH)))}else{1}) * (1-if(CT1 != 0){1/(1+10^(CT1*(pKa1-pH)))}else{1}) * (if(CT2 != 0){1/(1+10^(CT2*(pKa2-pH)))}else{1})/base^(CT1^2) +
+           (if(CT0 != 0){1/(1+10^(CT0*(pKa0-pH)))}else{1}) * (if(CT1 != 0){1/(1+10^(CT1*(pKa1-pH)))}else{1}) * (1-if(CT2 != 0){1/(1+10^(CT2*(pKa2-pH)))}else{1})/base^(CT2^2) +
+           (1-if(CT0 != 0){1/(1+10^(CT0*(pKa0-pH)))}else{1}) * (1-if(CT1 != 0){1/(1+10^(CT1*(pKa1-pH)))}else{1}) * (if(CT2 != 0){1/(1+10^(CT2*(pKa2-pH)))}else{1})/base^max(CT0+CT1,-CT0-CT1)+
+           (1-if(CT0 != 0){1/(1+10^(CT0*(pKa0-pH)))}else{1}) * (if(CT1 != 0){1/(1+10^(CT1*(pKa1-pH)))}else{1}) * (1-if(CT2 != 0){1/(1+10^(CT2*(pKa2-pH)))}else{1})/base^max(CT0+CT2,-CT0-CT2)+
+           (if(CT0 != 0){1/(1+10^(CT0*(pKa0-pH)))}else{1}) * (1-if(CT1 != 0){1/(1+10^(CT1*(pKa1-pH)))}else{1}) * (1-if(CT2 != 0){1/(1+10^(CT2*(pKa2-pH)))}else{1})/base^max(CT1+CT2,-CT1-CT2)+
+           (1-if(CT0 != 0){1/(1+10^(CT0*(pKa0-pH)))}else{1}) * (1-if(CT1 != 0){1/(1+10^(CT1*(pKa1-pH)))}else{1}) * (1-if(CT2 != 0){1/(1+10^(CT2*(pKa2-pH)))}else{1})/base^max(CT0+CT1+CT2,-CT0-CT1-CT2))
+    )
+  }
+  
+  if (fit_scale == "log") {
+    # Fit on log scale
+    base.nlm <- nls(log(S.aq.Fit) ~ log(model_formula(pH.aqf, base)),
+                    start = list(base=base), 
+                    algorithm = "port", 
+                    lower = 1)
+  } else {
+    # Fit on linear scale (original)
+    base.nlm <- nls(S.aq.Fit ~ model_formula(pH.aqf, base),
+                    start = list(base=base), 
+                    algorithm = "port", 
+                    lower = 1)
+  }
+  
   return(base.nlm)
 }
+
 
 # Calculate solubilities based on estimated SG
 S.aq.PKSim.calc.f <- function(obs.aq) {
@@ -255,7 +274,7 @@ S.aq.PKSim.calc.f <- function(obs.aq) {
 }
 
 SG.Est.f <- eventReactive(input$SGfit, {
-  base.nlm <- base.nlm.f(base.nlm)
+  base.nlm <- base.nlm.f(base.nlm, fit_scale = input$sg_fit_scale)
   
   # Calculate performance for the aqueous solubility model
   coeff  <- signif(summary(base.nlm)$coeff, digits = 6)
@@ -368,7 +387,7 @@ S.ion.f <- function(obs.br) {
 }
 
 
-LogK.nlm.f <- function(obs.br) {
+LogK.nlm.f <- function(obs.br, fit_scale = "linear") {
   # Subset input data for NLM functions and estimate the Bile Salt affinity constants
   obs.br <- S.ion.f(obs.br)
   BR.Fit <- obs.br[, 'BR.S_mg.ml']
@@ -376,27 +395,48 @@ LogK.nlm.f <- function(obs.br) {
   BS.Fit <- obs.br[, 'BS_mM']
   Si.Fit <- obs.br[, 'S_ion']
   
-  # Run nls function
-  if (CT0 == 0 & CT1 == 0 & CT2 == 0) {
-    LogK <- nls(BR.Fit ~ ((BS.Fit*(S_int/(1e3*C.H2O))*10^Log.K.mw.n+S_int)),
-                start = list(Log.K.mw.n = IE.Kn), 
-                algorithm = "port", lower = list(Log.K.mw.n = 0))
-    Log.K.mw.i <- 0
+  # Define the fitting function based on fitting scale
+  if (fit_scale == "log") {
+    # For neutral compounds
+    if (CT0 == 0 & CT1 == 0 & CT2 == 0) {
+      LogK <- nls(log(BR.Fit) ~ log((BS.Fit*(S_int/(1e3*C.H2O))*10^Log.K.mw.n+S_int)),
+                  start = list(Log.K.mw.n = IE.Kn), 
+                  algorithm = "port", 
+                  lower = list(Log.K.mw.n = 0))
+      Log.K.mw.i <- 0
+    } else {
+      # For ionizable compounds
+      LogK <- nls(log(BR.Fit) ~ log((BS.Fit*(S_int/(1e3*C.H2O))*10^Log.K.mw.n+S_int) +
+                                      (BS.Fit*(Si.Fit/(1e3*C.H2O))*10^Log.K.mw.i+Si.Fit)),
+                  start = list(Log.K.mw.n = IE.Kn, Log.K.mw.i = IE.Ki),
+                  algorithm = "port", 
+                  lower = list(Log.K.mw.n = 0, Log.K.mw.i = 0))
+      Log.K.mw.i <- environment(LogK[["m"]][["fitted"]])[["env"]][["Log.K.mw.i"]]
+    }
   } else {
-    LogK <- nls(BR.Fit ~ ((BS.Fit*(S_int/(1e3*C.H2O))*10^Log.K.mw.n+S_int) +
-                            (BS.Fit*(Si.Fit/(1e3*C.H2O))*10^Log.K.mw.i+Si.Fit)),
-                start = list(Log.K.mw.n = IE.Kn, Log.K.mw.i = IE.Ki),algorithm = "port", 
-                lower = list(Log.K.mw.n = 0, Log.K.mw.i = 0))
-    Log.K.mw.i <- environment(LogK[["m"]][["fitted"]])[["env"]][["Log.K.mw.i"]]
+    # Original linear weighting
+    if (CT0 == 0 & CT1 == 0 & CT2 == 0) {
+      LogK <- nls(BR.Fit ~ ((BS.Fit*(S_int/(1e3*C.H2O))*10^Log.K.mw.n+S_int)),
+                  start = list(Log.K.mw.n = IE.Kn), 
+                  algorithm = "port", 
+                  lower = list(Log.K.mw.n = 0))
+      Log.K.mw.i <- 0
+    } else {
+      LogK <- nls(BR.Fit ~ ((BS.Fit*(S_int/(1e3*C.H2O))*10^Log.K.mw.n+S_int) +
+                              (BS.Fit*(Si.Fit/(1e3*C.H2O))*10^Log.K.mw.i+Si.Fit)),
+                  start = list(Log.K.mw.n = IE.Kn, Log.K.mw.i = IE.Ki),
+                  algorithm = "port", 
+                  lower = list(Log.K.mw.n = 0, Log.K.mw.i = 0))
+      Log.K.mw.i <- environment(LogK[["m"]][["fitted"]])[["env"]][["Log.K.mw.i"]]
+    }
   }
   Log.K.mw.n <- environment(LogK[["m"]][["fitted"]])[["env"]][["Log.K.mw.n"]]
   
-  
-  return(list(obs.br=obs.br,LogK=LogK))
+  return(list(obs.br=obs.br, LogK=LogK))
 }
 
 Kmw.est.f <- eventReactive(input$Kfit, {
-  LogK    <- LogK.nlm.f(obs.br)$LogK
+  LogK    <- LogK.nlm.f(obs.br, fit_scale = input$fit_scale)$LogK
   coeff   <- if (CT0 == 0 & CT1 == 0 & CT2 == 0) {
     temp  <- as.data.frame(signif(summary(LogK)$coeff, digits = 6))
     empty <- c(0,"NA","NA","NA")
