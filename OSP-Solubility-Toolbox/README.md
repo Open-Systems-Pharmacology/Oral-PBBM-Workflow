@@ -27,7 +27,7 @@ To use the OSP Solubility Toolbox, follow these steps:
 2. **Open the R Script:** Open `OSP_SolubilityToolbox.R` in RStudio and install the required R packages (if not already installed):
 
    ```R
-   install.packages(c('shiny', 'shinythemes', 'shinyWidgets', 'gdata', 'openxlsx', 'ggplot2', 'gridExtra'))
+   install.packages(c('shiny', 'shinyjs', 'shinythemes', 'shinyWidgets', 'gdata', 'openxlsx', 'ggplot2', 'gridExtra'))
    ```
 
    
