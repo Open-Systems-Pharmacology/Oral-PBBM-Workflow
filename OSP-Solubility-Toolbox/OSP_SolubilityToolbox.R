@@ -219,14 +219,17 @@ ui <- fluidPage(
                         h3("API properties"),
                         numericInput("DAPI", "Diffusion coefficient of API [cm²/s]:", value = 6.7E-6,
                                      min = 0, step = 1e-7),
+                        em(textOutput("DAPI_suggested")), br(),
+                        
                         numericInput("S0", "Intrinsic solubility [M]:", value = 6.7E-6,
                                      min = 0, step = 1e-7),
+                        em(textOutput("S0_suggested")), br(),
                         
                         fluidRow(
                           column(6, selectInput("Salt", "Salt:", 
                                                 choices = list("No" = 0),
                                                 selected = 0)),
-                          column(6, numericInput("Ksp", "Salt solubility product [M²]:", value = 1.5E-1,
+                          column(6, numericInput("Ksp", "Salt solubility product [M²]:", value = 0,
                                                  min = 0, step = 0.01))
                         ),
                         
@@ -252,7 +255,7 @@ server <- function(input, output, session) {
   calc_status <- reactiveVal(TRUE)
   vals <- reactiveValues(p1=NULL,p2=NULL,p3=NULL,p4=NULL,p5=NULL,output_df = NULL)
   
-  # Specify input data once, using observe() wrapper
+  # observe() wrapper for data import, aqueous solubility, and biorelevant solubility tab:
   observe({
     API      <- input$API
     MW.API   <- input$MW.API
@@ -528,7 +531,7 @@ server <- function(input, output, session) {
   })
   
   
-  # observe() wrapper for surface pH calculations
+  # observe() wrapper for surface pH calculations:
   
   observe({
     API      <- input$API
@@ -548,11 +551,26 @@ server <- function(input, output, session) {
     ref_unit <- input$ref_unit
     base     <- input$SG_I
     
-    int_pH   <- input$int_pH
-    int_sol  <- input$int_sol
-    int_unit <- input$int_unit
-    
     source("SolubilityFunctionsExport.R", local = T)
+    
+    # Calculate suggested diffusion coefficient based on OSP equation
+    suggested_diffusion <- (60 * 10^(-4.113 -0.4609 *log(MW,10)) *1E-2)*100/60     # Equation implemented in PK-Sim/MoBi for calculating aqueous diffusion coefficient, output in cm²/s
+    
+    # Add output for suggested diffusion coefficient
+    output$DAPI_suggested <- renderText({
+      paste0("Suggested diffusion coefficient: ", formatC(suggested_diffusion, format = "e", digits = 3), 
+             " cm²/s (PK-Sim equation)")
+    })
+    
+    # Add output for suggested intrinsic solubility
+    output$S0_suggested <- renderText({
+      # Use the same function as in biorelevant tab
+      paste0("Suggested back-calculated intrinsic solubility: ", 
+             S.int.f(CT0, CT1, CT2, pKa0, pKa1, pKa2, 
+                     getUnitFactor.ref.f(ref_unit) * ref_sol, ref_pH), 
+             " mg/mL, extrapolated to solubility @pH: ", 
+             pH.int.f(CT0, CT1, CT2, pKa0, pKa1, pKa2))
+    })
     
     # Surface pH calculations
     surface_ph_data <- eventReactive(input$calc_pH, {
