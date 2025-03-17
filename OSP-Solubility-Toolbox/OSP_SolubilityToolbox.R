@@ -508,7 +508,52 @@ server <- function(input, output, session) {
       }, height = 500, width = 1000)  # Adjusted width to accommodate two plots
     })
     
-
+    output$downloadAQreport = downloadHandler(
+      filename = function() {"AQreport.pdf"},
+      content = function(file) {
+        pdf(file, onefile = TRUE)
+        grid.arrange(vals$p1,vals$p2)
+        dev.off()
+      }
+    )
+    
+    output$downloadBRreport = downloadHandler(
+      filename = function() {"BRreport.pdf"},
+      content = function(file) {
+        pdf(file, onefile = TRUE)
+        grid.arrange(vals$p3,vals$p4,vals$p5,vals$p6, ncol=2) 
+        dev.off()
+      }
+    )
+  })
+  
+  
+  # observe() wrapper for surface pH calculations
+  
+  observe({
+    API      <- input$API
+    MW.API   <- input$MW.API
+    MW.unit  <- input$MW.unit
+    LogP     <- input$LogP
+    
+    CT0      <- as.numeric(input$CT0)
+    pKa0     <- input$pKa0
+    CT1      <- as.numeric(input$CT1)
+    pKa1     <- input$pKa1
+    CT2      <- as.numeric(input$CT2)
+    pKa2     <- input$pKa2
+    
+    ref_pH   <- input$ref_pH
+    ref_sol  <- input$ref_sol
+    ref_unit <- input$ref_unit
+    base     <- input$SG_I
+    
+    int_pH   <- input$int_pH
+    int_sol  <- input$int_sol
+    int_unit <- input$int_unit
+    
+    source("SolubilityFunctionsExport.R", local = T)
+    
     # Surface pH calculations
     surface_ph_data <- eventReactive(input$calc_pH, {
       
@@ -553,8 +598,19 @@ server <- function(input, output, session) {
         print('Too many iterations')
       }
       
+      # Create a progress object
+      progress <- shiny::Progress$new()
+      progress$set(message = "Calculating surface pH", value = 0)
+      on.exit(progress$close())
+      
       # Loop through pH values
-      for (pH in seq(0.1, 14, by = 0.1)) {
+      pH_values <- seq(0.1, 14, by = 0.1)
+      total_steps <- length(pH_values)
+      
+      for (i in seq_along(pH_values)) {
+        pH <- pH_values[i]
+        progress$set(value = i/total_steps, 
+                     detail = sprintf("Processing pH %.1f", pH))
         
         # Charge Flux Neutrality equation for buffered solutions:
         f.CFN <- function(Hsurf) {
@@ -642,12 +698,16 @@ server <- function(input, output, session) {
         }, error = function(e) {
           message("Error at pH ", pH, ": ", e$message)
         })
+        
+        # Add small delay to allow UI to update
+        Sys.sleep(0.01)
       }
+      
       # Set calculation status to TRUE when finished
       calc_status(TRUE)
       
       vals$output_df <- result_df
-      # return(vals$output_df)
+      return(vals$output_df)
     })
     
     observe({
@@ -661,40 +721,40 @@ server <- function(input, output, session) {
     # Generate the plot
     output$surface_pH_plot <- renderPlot({
       req(surface_ph_data())
-
+      
       ggplot() +
         theme(
           axis.line = element_line(colour = "black", linewidth = .5, linetype = "solid"),
           rect = element_rect(fill = "white", colour = "black", linewidth = .5, linetype = 1),
-
+          
           axis.text = element_text(size = 14),
           axis.title = element_text(size = 16, face = "bold"),
-
+          
           panel.background = element_rect(fill = "white", colour = "white", linewidth = 0.5, linetype = "solid"),
           panel.grid.major = element_line(linewidth = 0.25, linetype = 'solid', colour = "grey90"),
           panel.grid.minor = element_line(linewidth = 0.25, linetype = 'solid', colour = "grey90"),
-
+          
           legend.key = element_rect(fill = "white"),
           legend.background = element_rect(linewidth = 0.5, linetype = 'solid', color = 'black'),
           legend.text = element_text(size = 10),
           legend.position = "bottom",
           legend.box = "horizontal",
-
+          
           plot.title = element_text(size = 18, face = "bold", hjust = 0.5),
           plot.margin = unit(c(.4, .4, .2, .5), 'cm'),
-
+          
           aspect.ratio = 1
         ) +
-
+        
         geom_abline(slope = 1, intercept = 0, linewidth = 0.75, linetype = "solid", color = "gray50") +
         geom_line(data = vals$output_df, aes(x = pH, y = pHsurf, color = "Surface pH (buffered)"), linewidth = 1, linetype = "solid") +
         geom_line(data = vals$output_df, aes(x = pH, y = pHsurfu, color = "Surface pH (unbuffered)"), linewidth = 1, linetype = "dashed") +
         geom_line(data = vals$output_df, aes(x = pH, y = pHeq, color = "Equilibrium pH (buffered)"), linewidth = 1, linetype = "dotdash") +
         geom_line(data = vals$output_df, aes(x = pH, y = pHequ, color = "Equilibrium pH (unbuffered)"), linewidth = 1, linetype = "longdash") +
-
+        
         scale_x_continuous(limits = c(0, 14), n.breaks = 8) +
         scale_y_continuous(limits = c(0, 14), n.breaks = 8) +
-
+        
         scale_color_manual(values = c("Surface pH (buffered)" = "#482173",
                                       "Surface pH (unbuffered)" = "#2e6f8e",
                                       "Equilibrium pH (buffered)" = "#29af7f",
@@ -703,32 +763,14 @@ server <- function(input, output, session) {
                                       "Surface pH (unbuffered)",
                                       "Equilibrium pH (buffered)",
                                       "Equilibrium pH (unbuffered)")) +
-
+        
         guides(color = guide_legend(ncol = 2)) +
-
-        labs(title = paste("Surface and equilibrium pH for", input$API), # , name
+        
+        labs(title = paste("Surface and equilibrium pH for", API), # , name
              x = "Initial or bulk pH",
              y = "Equilibrium or surface pH",
              color = NULL)
     }, height = 750)
-
-    output$downloadAQreport = downloadHandler(
-      filename = function() {"AQreport.pdf"},
-      content = function(file) {
-        pdf(file, onefile = TRUE)
-        grid.arrange(vals$p1,vals$p2)
-        dev.off()
-      }
-    )
-    
-    output$downloadBRreport = downloadHandler(
-      filename = function() {"BRreport.pdf"},
-      content = function(file) {
-        pdf(file, onefile = TRUE)
-        grid.arrange(vals$p3,vals$p4,vals$p5,vals$p6, ncol=2) 
-        dev.off()
-      }
-    )
   })
   
 }
