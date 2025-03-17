@@ -250,7 +250,7 @@ ui <- fluidPage(
 server <- function(input, output, session) {
   
   calc_status <- reactiveVal(TRUE)
-  vals <- reactiveValues(p1=NULL,p2=NULL,p3=NULL,p4=NULL,p5=NULL)
+  vals <- reactiveValues(p1=NULL,p2=NULL,p3=NULL,p4=NULL,p5=NULL,output_df = NULL)
   
   # Specify input data once, using observe() wrapper
   observe({
@@ -646,7 +646,8 @@ server <- function(input, output, session) {
       # Set calculation status to TRUE when finished
       calc_status(TRUE)
       
-      return(result_df)
+      vals$output_df <- result_df
+      # return(vals$output_df)
     })
     
     observe({
@@ -665,57 +666,57 @@ server <- function(input, output, session) {
         theme(
           axis.line = element_line(colour = "black", linewidth = .5, linetype = "solid"),
           rect = element_rect(fill = "white", colour = "black", linewidth = .5, linetype = 1),
-          
+
           axis.text = element_text(size = 14),
           axis.title = element_text(size = 16, face = "bold"),
-          
+
           panel.background = element_rect(fill = "white", colour = "white", linewidth = 0.5, linetype = "solid"),
           panel.grid.major = element_line(linewidth = 0.25, linetype = 'solid', colour = "grey90"),
           panel.grid.minor = element_line(linewidth = 0.25, linetype = 'solid', colour = "grey90"),
-          
+
           legend.key = element_rect(fill = "white"),
           legend.background = element_rect(linewidth = 0.5, linetype = 'solid', color = 'black'),
           legend.text = element_text(size = 10),
           legend.position = "bottom",
           legend.box = "horizontal",
-          
+
           plot.title = element_text(size = 18, face = "bold", hjust = 0.5),
           plot.margin = unit(c(.4, .4, .2, .5), 'cm'),
-          
+
           aspect.ratio = 1
         ) +
-        
+
         geom_abline(slope = 1, intercept = 0, linewidth = 0.75, linetype = "solid", color = "gray50") +
-        geom_line(data = result_df, aes(x = pH, y = pHsurf, color = "Surface pH (buffered)"), linewidth = 1, linetype = "solid") +
-        geom_line(data = result_df, aes(x = pH, y = pHsurfu, color = "Surface pH (unbuffered)"), linewidth = 1, linetype = "dashed") +
-        geom_line(data = result_df, aes(x = pH, y = pHeq, color = "Equilibrium pH (buffered)"), linewidth = 1, linetype = "dotdash") +
-        geom_line(data = result_df, aes(x = pH, y = pHequ, color = "Equilibrium pH (unbuffered)"), linewidth = 1, linetype = "longdash") +
-        
+        geom_line(data = vals$output_df, aes(x = pH, y = pHsurf, color = "Surface pH (buffered)"), linewidth = 1, linetype = "solid") +
+        geom_line(data = vals$output_df, aes(x = pH, y = pHsurfu, color = "Surface pH (unbuffered)"), linewidth = 1, linetype = "dashed") +
+        geom_line(data = vals$output_df, aes(x = pH, y = pHeq, color = "Equilibrium pH (buffered)"), linewidth = 1, linetype = "dotdash") +
+        geom_line(data = vals$output_df, aes(x = pH, y = pHequ, color = "Equilibrium pH (unbuffered)"), linewidth = 1, linetype = "longdash") +
+
         scale_x_continuous(limits = c(0, 14), n.breaks = 8) +
         scale_y_continuous(limits = c(0, 14), n.breaks = 8) +
-        
+
         scale_color_manual(values = c("Surface pH (buffered)" = "#482173",
                                       "Surface pH (unbuffered)" = "#2e6f8e",
                                       "Equilibrium pH (buffered)" = "#29af7f",
                                       "Equilibrium pH (unbuffered)" = "#bddf26"),
-                           breaks = c("Surface pH (buffered)", 
-                                      "Surface pH (unbuffered)", 
-                                      "Equilibrium pH (buffered)", 
+                           breaks = c("Surface pH (buffered)",
+                                      "Surface pH (unbuffered)",
+                                      "Equilibrium pH (buffered)",
                                       "Equilibrium pH (unbuffered)")) +
-        
+
         guides(color = guide_legend(ncol = 2)) +
-        
-        labs(title = paste("Surface and equilibrium pH for", name),  
+
+        labs(title = paste("Surface and equilibrium pH for", input$API), # , name
              x = "Initial or bulk pH",
              y = "Equilibrium or surface pH",
              color = NULL)
     }, height = 750)
-    
+
     output$downloadAQreport = downloadHandler(
       filename = function() {"AQreport.pdf"},
       content = function(file) {
         pdf(file, onefile = TRUE)
-        grid.arrange(vals$p1,vals$p2) 
+        grid.arrange(vals$p1,vals$p2)
         dev.off()
       }
     )
