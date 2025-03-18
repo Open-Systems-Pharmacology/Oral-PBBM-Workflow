@@ -21,7 +21,12 @@ ui <- fluidPage(
         background-color: #cccccc !important;
         border-color: #cccccc !important;
       }
-    "))
+      .input-disabled {
+      opacity: 0.65;
+      background-color: #f5f5f5 !important;
+      cursor: not-allowed;
+    }
+  "))
   ),
   
   #Navbar structure for UI
@@ -55,7 +60,7 @@ ui <- fluidPage(
                         ),  
                         mainPanel(tableOutput("observed"))
                       )
-             ), 
+             ),
              
              # SG-estimation tool for aqueous solubility
              tabPanel("Aqueous Solubility", fluid = TRUE, icon = icon("flask"),
@@ -298,6 +303,21 @@ server <- function(input, output, session) {
     
     obs.br  <- read.xlsx(input$obs.file$datapath,sheet="Observed.Biorelevant")
     obs.br  <- data.frame(apply(obs.br,MARGIN = 2,trimws,"both"),stringsAsFactors = FALSE)
+    
+    # Make API properties non-editable after data import
+    observeEvent(input$obs.file, {
+      # Disable the input fields
+      shinyjs::disable("API")
+      shinyjs::disable("LogP")
+      shinyjs::disable("MW.API")
+      shinyjs::disable("MW.unit")
+      
+      # Add CSS to make them appear greyed out
+      shinyjs::addClass("API", "input-disabled")
+      shinyjs::addClass("LogP", "input-disabled")
+      shinyjs::addClass("MW.API", "input-disabled")
+      shinyjs::addClass("MW.unit", "input-disabled")
+    })
     
     # Source helper functions
     source("SolubilityFunctionsExport.R", local = T)
