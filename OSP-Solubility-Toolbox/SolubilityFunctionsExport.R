@@ -530,9 +530,20 @@ plot.RES.bs.br.f <- function (obs.br) {
 }
 
 
-#### Surface pH Functions ####
+#############################################
+##### SURFACE pH FUNCTIONS ##################
+#############################################
 
-### Equilibrium Functions ###
+### API Diffusion Coefficient Calculations ####
+
+# Calculate Diffusion Coefficient based on OSP equation
+calculate_diffusion_coefficient <- function(MW.API) {
+  diffusion_coeff <- (60 * 10^(-4.113 -0.4609 *log(MW.API,10)) *1E-2)*100/60     # Equation implemented in PK-Sim/MoBi for calculating aqueous diffusion coefficient, output in cm²/s
+
+  return(diffusion_coeff)
+}
+
+### Equilibrium Functions ####
 
 # Calculate equilibrium concentration of ionized species A-
 Aeq.f <- function(CT0, CT1, CT2, pKa0, Salt, Heq, S0) {
@@ -649,7 +660,7 @@ Beq.f <- function(CT0, CT1, CT2, pKa0, Salt, Heq, S0) {
 }
 
 
-### Surface Functions ###
+### Surface Functions ####
 
 # Calculate surface concentration of ionized species A-
 Asurf.f <- function(CT0, CT1, CT2, pKa0, Salt, Hsurf, S0) {
@@ -743,7 +754,7 @@ Bsurf.f <- function(CT0, CT1, CT2, pKa0, Salt, Hsurf, S0) {
 }
 
 
-### Buffer Functions ###
+### Buffer Functions ####
 
 # Calculate buffer component concentration CXT
 CXT.f <- function(BT, C.buffer, BcarB, pH, Kw, pKaYH) {
@@ -868,4 +879,281 @@ CYTu.f <- function(pH, Kw, pKaYH) {
   }, error = function(e) {
     stop(paste("Error in CYTu calculation:", e$message))
   })
+}
+
+
+### Root Finding Method ####
+
+# Bisection method for finding roots
+bisection_method <- function(f, a = 0, b = 1, n = 1000, tol = 1e-16) {
+  if (!(f(a) < 0) && (f(b) > 0)) {
+    stop('The root does not exist within this interval')
+  } else if (!(f(a) > 0) && (f(b) < 0)) {
+    stop('The root does not exist within this interval')
+  }
+  for (i in 1:n) {
+    c <- (a + b) / 2
+    if ((f(c) == 0) || ((b - a) / 2) < tol) {
+      return(c)
+    }
+    ifelse(sign(f(c)) == sign(f(a)), 
+           a <- c,
+           b <- c)
+  }
+  print('Too many iterations')
+}
+
+
+### Surface pH Calculation Functions ####
+
+# Charge Flux Neutrality equation for buffered solutions
+calculate_CFN <- function(Hsurf, pH, DH, DOH, DAPI, DYH, DX, CT0_num, CT1_num, CT2_num, 
+                          pKa0, Salt_num, S0, BT_num, C_buffer, BcarB_num, Kw, pKaYH) {
+  ZH <- ZBH <- ZYH <- 1
+  ZOH <- ZA <- ZX <- -1
+  
+  Hh <- 10^(-pH)
+  KaHX <- 10^(-pH)
+  KaYH <- 10^(-pKaYH)
+  
+  ( ZH*DH*Hsurf + 
+      ZBH*DAPI*BHsurf.f(CT0_num,CT1_num,CT2_num,pKa0,Salt_num,Hsurf,S0) + 
+      ZYH*DYH*CYT.f(BT_num,C_buffer,BcarB_num,pH,Kw,pKaYH)/(1+KaYH/Hsurf) ) +
+    ( ZOH*DOH*Kw/Hsurf + 
+        ZA*DAPI*Asurf.f(CT0_num,CT1_num,CT2_num,pKa0,Salt_num,Hsurf,S0) + 
+        ZX*DX*CXT.f(BT_num,C_buffer,BcarB_num,pH,Kw,pKaYH)/(1+Hsurf/KaHX) ) -
+    ( ZH*DH*Hh + 
+        ZYH*DYH*CYT.f(BT_num,C_buffer,BcarB_num,pH,Kw,pKaYH)/(1+KaYH/Hh) ) - 
+    ( ZOH*DOH*Kw/Hh + 
+        ZX*DX*CXT.f(BT_num,C_buffer,BcarB_num,pH,Kw,pKaYH)/(1+Hh/KaHX) )
+}
+
+# Electroneutrality equation for buffered solutions
+calculate_ECN <- function(Heq, pH, DH, DOH, DAPI, DYH, DX, CT0_num, CT1_num, CT2_num, 
+                          pKa0, Salt_num, S0, BT_num, C_buffer, BcarB_num, Kw, pKaYH) {
+  ZH <- ZBH <- ZYH <- 1
+  ZOH <- ZA <- ZX <- -1
+  
+  Hh <- 10^(-pH)
+  KaHX <- 10^(-pH)
+  KaYH <- 10^(-pKaYH)
+  
+  ( ZH*Heq + 
+      ZBH*BHeq.f(CT0_num,CT1_num,CT2_num,pKa0,Salt_num,Heq,S0) + 
+      ZYH*CYT.f(BT_num,C_buffer,BcarB_num,pH,Kw,pKaYH)/(1+KaYH/Heq) ) + 
+    ( ZOH*Kw/Heq + 
+        ZA*Aeq.f(CT0_num,CT1_num,CT2_num,pKa0,Salt_num,Heq,S0) + 
+        ZX*CXT.f(BT_num,C_buffer,BcarB_num,pH,Kw,pKaYH)/(1+Heq/KaHX) )
+}
+
+# Charge Flux Neutrality equation for unbuffered solutions
+calculate_CFNu <- function(Hsurf, pH, DH, DOH, DAPI, DYH, DX, CT0_num, CT1_num, CT2_num, 
+                           pKa0, Salt_num, S0, Kw, pKaYH) {
+  ZH <- ZBH <- ZYH <- 1
+  ZOH <- ZA <- ZX <- -1
+  
+  Hh <- 10^(-pH)
+  KaHX <- 10^(-pH)
+  KaYH <- 10^(-pKaYH)
+  
+  ( ZH*DH*Hsurf + 
+      ZBH*DAPI*BHsurf.f(CT0_num,CT1_num,CT2_num,pKa0,Salt_num,Hsurf,S0) + 
+      ZYH*DYH*CYTu.f(pH,Kw,pKaYH)/(1+KaYH/Hsurf) ) +
+    ( ZOH*DOH*Kw/Hsurf + 
+        ZA*DAPI*Asurf.f(CT0_num,CT1_num,CT2_num,pKa0,Salt_num,Hsurf,S0) + 
+        ZX*DX*CXTu.f(pH)/(1+Hsurf/KaHX) ) -
+    ( ZH*DH*Hh + 
+        ZYH*DYH*CYTu.f(pH,Kw,pKaYH)/(1+KaYH/Hh) ) - 
+    ( ZOH*DOH*Kw/Hh + 
+        ZX*DX*CXTu.f(pH)/(1+Hh/KaHX) )
+}
+
+# Electroneutrality equation for unbuffered solutions
+calculate_ECNu <- function(Heq, pH, DH, DOH, DAPI, DYH, DX, CT0_num, CT1_num, CT2_num, 
+                           pKa0, Salt_num, S0, Kw, pKaYH) {
+  ZH <- ZBH <- ZYH <- 1
+  ZOH <- ZA <- ZX <- -1
+  
+  Hh <- 10^(-pH)
+  KaHX <- 10^(-pH)
+  KaYH <- 10^(-pKaYH)
+  
+  ( ZH*Heq + 
+      ZBH*BHeq.f(CT0_num,CT1_num,CT2_num,pKa0,Salt_num,Heq,S0) + 
+      ZYH*CYTu.f(pH,Kw,pKaYH)/(1+KaYH/Heq) ) + 
+    ( ZOH*Kw/Heq + 
+        ZA*Aeq.f(CT0_num,CT1_num,CT2_num,pKa0,Salt_num,Heq,S0) + 
+        ZX*CXTu.f(pH)/(1+Heq/KaHX) )
+}
+
+# Calculate surface pH for a range of pH values
+calculate_surface_ph <- function(pH_values, DH, DOH, DAPI, DYH, DX, CT0_num, CT1_num, CT2_num, 
+                                 pKa0, Salt_num, S0, BT_num, C_buffer, BcarB_num, Kw, pKaYH,
+                                 progress_callback = NULL) {
+  
+  result_df <- data.frame(pH = numeric(), 
+                          Hsurf = numeric(), 
+                          pHsurf = numeric(), 
+                          Heq = numeric(), 
+                          pHeq = numeric(),
+                          Hsurfu = numeric(), 
+                          pHsurfu = numeric(), 
+                          Hequ = numeric(), 
+                          pHequ = numeric())
+  
+  total_steps <- length(pH_values)
+  
+  for (i in seq_along(pH_values)) {
+    pH <- pH_values[i]
+    
+    # Update progress if callback provided
+    if (!is.null(progress_callback)) {
+      progress_callback(i/total_steps, sprintf("Processing pH %.1f", pH))
+    }
+    
+    # Create closure functions for bisection method
+    f.CFN <- function(Hsurf) {
+      calculate_CFN(Hsurf, pH, DH, DOH, DAPI, DYH, DX, CT0_num, CT1_num, CT2_num, 
+                    pKa0, Salt_num, S0, BT_num, C_buffer, BcarB_num, Kw, pKaYH)
+    }
+    
+    f.ECN <- function(Heq) {
+      calculate_ECN(Heq, pH, DH, DOH, DAPI, DYH, DX, CT0_num, CT1_num, CT2_num, 
+                    pKa0, Salt_num, S0, BT_num, C_buffer, BcarB_num, Kw, pKaYH)
+    }
+    
+    f.CFNu <- function(Hsurf) {
+      calculate_CFNu(Hsurf, pH, DH, DOH, DAPI, DYH, DX, CT0_num, CT1_num, CT2_num, 
+                     pKa0, Salt_num, S0, Kw, pKaYH)
+    }
+    
+    f.ECNu <- function(Heq) {
+      calculate_ECNu(Heq, pH, DH, DOH, DAPI, DYH, DX, CT0_num, CT1_num, CT2_num, 
+                     pKa0, Salt_num, S0, Kw, pKaYH)
+    }
+    
+    # Calculate roots
+    tryCatch({
+      # Find the root for each pH value
+      root <- bisection_method(f = f.CFN, 0, 1)
+      ubrt <- bisection_method(f = f.CFNu, 0, 1)
+      eqrt <- bisection_method(f = f.ECN, 0, 1)
+      ueqr <- bisection_method(f = f.ECNu, 0, 1)
+      
+      # Append the result to the data frame
+      result_df <- rbind(result_df, 
+                         data.frame(pH = pH, 
+                                    Hsurf = root, 
+                                    pHsurf = -log10(root), 
+                                    Heq = eqrt, 
+                                    pHeq = -log10(eqrt), 
+                                    Hsurfu = ubrt, 
+                                    pHsurfu = -log10(ubrt), 
+                                    Hequ = ueqr, 
+                                    pHequ = -log10(ueqr)))
+    }, error = function(e) {
+      message("Error at pH ", pH, ": ", e$message)
+    })
+  }
+  
+  return(result_df)
+}
+
+
+### Create surface pH plot ####
+
+create_surface_ph_plot <- function(result_df, API_name) {
+  
+  plot_data <- rbind(
+    transform(result_df, type = "Surface pH (buffered)", value = pHsurf),
+    transform(result_df, type = "Surface pH (unbuffered)", value = pHsurfu),
+    transform(result_df, type = "Equilibrium pH (buffered)", value = pHeq),
+    transform(result_df, type = "Equilibrium pH (unbuffered)", value = pHequ)
+  )
+  
+  ggplot(plot_data, aes(x = pH, y = value, color = type, linetype = type)) +
+    theme(
+      axis.line = element_line(colour = "black", linewidth = .5, linetype = "solid"),
+      rect = element_rect(fill = "white", colour = "black", linewidth = .5, linetype = 1),
+      
+      axis.text = element_text(size = 14),
+      axis.title = element_text(size = 16, face = "bold"),
+      
+      panel.background = element_rect(fill = "white", colour = "white", linewidth = 0.5, linetype = "solid"),
+      panel.grid.major = element_line(linewidth = 0.25, linetype = 'solid', colour = "grey90"),
+      panel.grid.minor = element_line(linewidth = 0.25, linetype = 'solid', colour = "grey90"),
+      
+      legend.text = element_text(size = 14),
+      legend.title = element_text(size = 16, face = "bold"),
+      legend.key.size = unit(1.5, "cm"),
+      legend.spacing.x = unit(0.5, "cm"),
+      legend.spacing.y = unit(0.5, "cm"),
+      legend.margin = margin(10, 10, 10, 10),
+      legend.key = element_rect(fill = "white"),
+      legend.background = element_rect(linewidth = 0.5, linetype = 'solid', color = 'black'),
+      legend.position = "bottom",
+      legend.box = "horizontal",
+      
+      plot.title = element_text(size = 18, face = "bold", hjust = 0.5),
+      plot.margin = unit(c(.4, .4, .2, .5), 'cm'),
+      
+      aspect.ratio = 1
+    ) +
+    
+    geom_abline(slope = 1, intercept = 0, linewidth = 0.75, linetype = "solid", color = "gray50") +
+    
+    # Use a single geom_line call with the combined data
+    geom_line(linewidth = 1) +
+    
+    scale_x_continuous(limits = c(0, 14), n.breaks = 8) +
+    scale_y_continuous(limits = c(0, 14), n.breaks = 8) +
+    
+    # Define colors for each line
+    scale_color_manual(values = c("Surface pH (buffered)" = "#482173",
+                                  "Surface pH (unbuffered)" = "#2e6f8e",
+                                  "Equilibrium pH (buffered)" = "#29af7f",
+                                  "Equilibrium pH (unbuffered)" = "#bddf26")) +
+    
+    # Define line types for each line
+    scale_linetype_manual(values = c("Surface pH (buffered)" = "solid",
+                                     "Surface pH (unbuffered)" = "dashed",
+                                     "Equilibrium pH (buffered)" = "dotted",
+                                     "Equilibrium pH (unbuffered)" = "dotdash")) +
+    
+    # Modify the legend guide to increase key width and overall appearance
+    guides(
+      color = guide_legend(ncol = 2, keywidth = 3, keyheight = 1, default.unit = "cm"), 
+      linetype = guide_legend(ncol = 2, keywidth = 3, keyheight = 1, default.unit = "cm")
+    ) +
+    
+    labs(title = paste("Surface and equilibrium pH for", API_name),
+         x = "Initial or bulk pH",
+         y = "Equilibrium or surface pH",
+         color = NULL, linetype = NULL)
+}
+
+
+#############################################
+##### ADDITIONAL HELPER FUNCTIONS ###########
+#############################################
+
+#### Common Plot Theme ####
+create_osp_theme <- function() {
+  theme(
+    axis.line = element_line(colour = "black", linewidth = 1, linetype = "solid"),
+    rect = element_rect(fill = "white", colour = "black", linewidth = 0.5, linetype = 1),
+    
+    axis.text = element_text(size = 14),
+    axis.title = element_text(size = 16, face = "bold"),
+    
+    panel.background = element_rect(fill = "white", colour = "white", linewidth = 0.5, linetype = "solid"),
+    panel.grid.major = element_line(linewidth = 0.5, linetype = 'solid', colour = "lightgray"),
+    panel.grid.minor = element_line(linewidth = 0.25, linetype = 'solid', colour = "lightgray"),
+    
+    legend.key = element_rect(fill = "white"),
+    
+    plot.title = element_text(size = 18, face = "bold", hjust = 0.5),
+    plot.subtitle = element_text(size = 16, hjust = 0.5),
+    plot.margin = unit(c(.4, .4, .2, .5), 'cm')
+  )
 }
