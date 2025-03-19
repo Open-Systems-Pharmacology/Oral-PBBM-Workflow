@@ -1,5 +1,5 @@
 #############################################
-##### SOLUBILITY FUNCTIONS ##################
+##### DATA IMPORT FUNCTIONS #################
 #############################################
 
 #### Convert reference and observed solubility data to mg/ml ####
@@ -65,6 +65,10 @@ Input.tab.f <- function() {
   return(df)
 }
 
+
+#############################################
+##### AQUEOUS SOLUBILITY FUNCTIONS ##########
+#############################################
 
 #### Calculate Solubility-pH profile ####
 # Solubility plot functions
@@ -331,7 +335,13 @@ plot.RES.pH.aq.f <- function (df,obs.aq) {
   return(p)
 }
 
+
+#############################################
+##### BIORELEVANT SOLUBILITY FUNCTIONS ######
+#############################################
+
 #### Biorelevant solubility calculation ####
+
 Kmwn.f <- function (LogP) {
   IE.Log.K.mw.n.r <- 0.74*LogP+2.291
   IE.Log.K.mw.n   <- signif(IE.Log.K.mw.n.r, digits = 4)
@@ -387,6 +397,57 @@ S.ion.f <- function(obs.br) {
 }
 
 
+### Create predicted vs observed biorelevant solubility plot ####
+
+create_biorelevant_pred_obs_plot <- function(obs.br) {
+  # Process the data if not already processed
+  if (!("Pred.br" %in% colnames(obs.br))) {
+    obs.br <- S.ion.f(obs.br)
+    obs.br <- Pred.br.f(obs.br)
+  }
+  
+  # Calculate min and max values for plot limits
+  max_value <- max(max(obs.br$BR.S_mg.ml, na.rm = TRUE), max(obs.br$Pred.br, na.rm = TRUE))
+  min_value <- min(min(obs.br$BR.S_mg.ml[obs.br$BR.S_mg.ml > 0], na.rm = TRUE), min(obs.br$Pred.br[obs.br$Pred.br > 0], na.rm = TRUE))
+  
+  # Create linear scale plot
+  p1 <- ggplot(obs.br, aes(x = BR.S_mg.ml, y = Pred.br)) +
+    create_osp_theme() +
+    
+    geom_point(size = 3, stroke = 0.5, color = "#2e6f8e") +
+    geom_abline(slope = 1, intercept = 0, linewidth = 0.75, linetype = "solid", color = "gray50") +
+    
+    scale_x_continuous(limits = c(0, max_value * 1.1), expand = c(0, 0)) +
+    scale_y_continuous(limits = c(0, max_value * 1.1), expand = c(0, 0)) +
+    
+    labs(subtitle = "Linear Scale",
+         x = "Observed Biorelevant Solubility (mg/mL)",
+         y = "Predicted Biorelevant Solubility (mg/mL)")
+  
+  # Create log scale plot
+  p2 <- ggplot(obs.br, aes(x = BR.S_mg.ml, y = Pred.br)) +
+    create_osp_theme() +
+    
+    geom_point(size = 3, stroke = 0.5, color = "#2e6f8e") +
+    geom_abline(slope = 1, intercept = 0, linewidth = 0.75, linetype = "solid", color = "gray50") +
+    
+    scale_x_log10(limits = c(min_value * 0.9, max_value * 1.1)) +
+    scale_y_log10(limits = c(min_value * 0.9, max_value * 1.1)) +
+    
+    labs(subtitle = "Log Scale",
+         x = "Observed Biorelevant Solubility (mg/mL)",
+         y = "Predicted Biorelevant Solubility (mg/mL)")
+  
+  return(list(
+    p1 = p1,
+    p2 = p2,
+    grid = grid.arrange(p1, p2, ncol = 2)
+  ))
+}
+
+
+### Parameter optimization ####
+
 LogK.nlm.f <- function(obs.br, fit_scale = "linear") {
   # Subset input data for NLM functions and estimate the Bile Salt affinity constants
   obs.br <- S.ion.f(obs.br)
@@ -435,6 +496,7 @@ LogK.nlm.f <- function(obs.br, fit_scale = "linear") {
   return(list(obs.br=obs.br, LogK=LogK))
 }
 
+
 Kmw.est.f <- eventReactive(input$Kfit, {
   LogK    <- LogK.nlm.f(obs.br, fit_scale = input$fit_scale)$LogK
   coeff   <- if (CT0 == 0 & CT1 == 0 & CT2 == 0) {
@@ -454,6 +516,7 @@ Kmw.est.f <- eventReactive(input$Kfit, {
   return(list(t = coeffK)) #, obs.br = obs.br, v = K.bm.n
 })
 
+
 Pred.br.f <- function(obs.br) {
   for (i in 1:dim(obs.br)[1]) {
     obs.br$`Pred.br`[i] <- ((obs.br$BS_mM[i]*(S_int/(1e3*C.H2O))*10^IE.Kn+S_int) +
@@ -461,6 +524,7 @@ Pred.br.f <- function(obs.br) {
   }
   return(obs.br)
 }
+
 
 plot.RES.pH.br.f <- function (obs.br) {
   p <- ggplot(obs.br, aes(x=as.numeric(pH.BR), y=Ln.RES)) +
@@ -601,7 +665,6 @@ BHeq.f <- function(CT0, CT1, CT2, pKa0, Salt, Heq, S0) {
     stop(paste("Error in BHeq calculation:", e$message))
   })
 }
-
 
 # Calculate equilibrium concentration of neutral species HA
 HAeq.f <- function(CT0, CT1, CT2, pKa0, Salt, Heq, S0) {
@@ -1140,20 +1203,30 @@ create_surface_ph_plot <- function(result_df, API_name) {
 #### Common Plot Theme ####
 create_osp_theme <- function() {
   theme(
-    axis.line = element_line(colour = "black", linewidth = 1, linetype = "solid"),
+    axis.line = element_line(colour = "black", linewidth = .5, linetype = "solid"),
     rect = element_rect(fill = "white", colour = "black", linewidth = 0.5, linetype = 1),
     
     axis.text = element_text(size = 14),
     axis.title = element_text(size = 16, face = "bold"),
     
     panel.background = element_rect(fill = "white", colour = "white", linewidth = 0.5, linetype = "solid"),
-    panel.grid.major = element_line(linewidth = 0.5, linetype = 'solid', colour = "lightgray"),
+    panel.grid.major = element_line(linewidth = 0.25, linetype = 'solid', colour = "lightgray"),
     panel.grid.minor = element_line(linewidth = 0.25, linetype = 'solid', colour = "lightgray"),
     
     legend.key = element_rect(fill = "white"),
+    legend.title = element_text(size = 16, face = "bold"),
+    legend.key.size = unit(1.5, "cm"),
+    legend.spacing.x = unit(0.5, "cm"),
+    legend.spacing.y = unit(0.5, "cm"),
+    legend.margin = margin(10, 10, 10, 10),
+    legend.background = element_rect(linewidth = 0.5, linetype = 'solid', color = 'black'),
+    legend.position = "bottom",
+    legend.box = "horizontal",
     
     plot.title = element_text(size = 18, face = "bold", hjust = 0.5),
     plot.subtitle = element_text(size = 16, hjust = 0.5),
-    plot.margin = unit(c(.4, .4, .2, .5), 'cm')
+    plot.margin = unit(c(.4, .4, .2, .5), 'cm'),
+    
+    aspect.ratio = 1
   )
 }

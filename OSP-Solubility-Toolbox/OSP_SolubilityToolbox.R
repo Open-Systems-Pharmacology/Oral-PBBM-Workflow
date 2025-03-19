@@ -177,16 +177,26 @@ ui <- fluidPage(
                         ), br()
                       ),
                       
-                      mainPanel(h4(p("Upload observed solubility data and input the API properties, then press 'Estimate Km:w' 
-                                     in order to fit the micelle partitioning coefficient(s) to your data")),
-                                tableOutput("K.tab"),
-                                h5(p(textOutput("CopyPasteK"))),
-                                fluidRow(
-                                  column(3, uiOutput("updateK")),
-                                  column(3, offset = 1, uiOutput("plotPredObs"))
-                                ),                                plotOutput(outputId = "KpHRes"),
-                                plotOutput(outputId = "KbsRes"),
-                                plotOutput(outputId = "predicted_vs_observed_bs")
+                      mainPanel(
+                        # Header
+                        h4(p("Upload observed solubility data and input the API properties, then press 'Estimate Km:w' to fit the micelle partitioning coefficient(s)")),
+                        
+                        # Predicted vs Observed plot
+                        tags$h5(style = "font-size: 16px; font-weight: bold; color: black; font-family: Arial, sans-serif; margin-top: 15px; 
+                                margin-bottom: 10px; text-align: center", "Predicted vs Observed Biorelevant Solubility"),
+                        plotOutput(outputId = "biorelevant_plot", height = "500px"),
+                        
+                        # Vertical space to prevent overlap
+                        tags$div(style = "margin-top: 20px;"),
+                        
+                        # Km:w estimation results and residual plots
+                        h4(""),
+                        tableOutput("K.tab"),
+                        h5(p(textOutput("CopyPasteK"))),
+                        fluidRow(
+                          column(3, uiOutput("updateK"))
+                        ),
+                        plotOutput(outputId = "KpHRes")
                       )
              ),
              
@@ -240,12 +250,37 @@ ui <- fluidPage(
                                      min = 0, step = 1e-7),
                         em(textOutput("S0_suggested")), br(),
                         
+                        # Input fields related to salts - disabled and greyed out as currently not fully implemented
                         fluidRow(
-                          column(6, selectInput("Salt", "Salt:", 
-                                                choices = list("No" = 0),
-                                                selected = 0)),
-                          column(6, numericInput("Ksp", "Salt solubility product [M²]:", value = 0,
-                                                 min = 0, step = 0.01))
+                          column(6, 
+                                 div(
+                                   class = "form-group input-disabled",
+                                   style = "opacity: 0.65;",
+                                   tags$label("Salt:", `for` = "Salt"),
+                                   tags$select(
+                                     id = "Salt",
+                                     class = "form-control",
+                                     disabled = "disabled",
+                                     tags$option(value = 0, selected = TRUE, "No")
+                                   )
+                                 )
+                          ),
+                          column(6, 
+                                 div(
+                                   class = "form-group input-disabled",
+                                   style = "opacity: 0.65;",
+                                   tags$label("Salt solubility product [M²]:", `for` = "Ksp"),
+                                   tags$input(
+                                     id = "Ksp",
+                                     type = "number",
+                                     class = "form-control",
+                                     value = "0",
+                                     min = "0",
+                                     step = "0.01",
+                                     disabled = "disabled"
+                                   )
+                                 )
+                          )
                         ),
                         
                         actionButton("calc_pH", "Calculate Surface pH", class = "btn-primary")
@@ -434,9 +469,6 @@ server <- function(input, output, session) {
       output$updateK <- renderUI({
         actionButton("updateK", label = "Plot Residuals")
       })
-      output$plotPredObs <- renderUI({
-        actionButton("plotPredObs", label = "Plot Predicted vs. Observed")
-      })
     })
     
     observeEvent(input$updateK, {
@@ -450,62 +482,19 @@ server <- function(input, output, session) {
       })
     })
     
-    observeEvent(input$plotPredObs, {
-      output$predicted_vs_observed_bs <- renderPlot({
-        obs.br <- S.ion.f(obs.br)
-        obs.br <- Pred.br.f(obs.br)
-        
-        max_value <- max(max(obs.br$BR.S_mg.ml, na.rm = TRUE), 
-                         max(obs.br$Pred.br, na.rm = TRUE))
-        min_value <- min(min(obs.br$BR.S_mg.ml[obs.br$BR.S_mg.ml > 0], na.rm = TRUE), 
-                         min(obs.br$Pred.br[obs.br$Pred.br > 0], na.rm = TRUE))
-        
-        # linear scale plot:
-        p1 <- ggplot(obs.br, aes(x = BR.S_mg.ml, y = Pred.br)) +
-          create_osp_theme() +
-          
-          geom_point(size=3, stroke = 0.5, color = "blue") +
-          geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "red") +
-          
-          # Set identical limits and breaks for both axes
-          scale_x_continuous(limits = c(0, max_value * 1.1), expand = c(0, 0)) +
-          scale_y_continuous(limits = c(0, max_value * 1.1), expand = c(0, 0)) +
-          
-          labs(title = "Predicted vs Observed Biorelevant Solubility",
-               subtitle = paste0(API, " (Linear Scale)"),
-               x = "Observed Biorelevant Solubility (mg/mL)",
-               y = "Predicted Biorelevant Solubility (mg/mL)") +
-          
-          theme(aspect.ratio = 1)
-        
-        # log scale plot:
-        p2 <- ggplot(obs.br, aes(x = BR.S_mg.ml, y = Pred.br)) +
-          create_osp_theme() +
-          
-          geom_point(size=3, stroke = 0.5, color = "blue") +
-          geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "red") +
-          
-          # Set log scales with identical limits
-          scale_x_log10(limits = c(min_value * 0.9, max_value * 1.1)) +
-          scale_y_log10(limits = c(min_value * 0.9, max_value * 1.1)) +
-          
-          labs(title = "Predicted vs Observed Biorelevant Solubility",
-               subtitle = paste0(API, " (Log Scale)"),
-               x = "Observed Biorelevant Solubility (mg/mL)",
-               y = "Predicted Biorelevant Solubility (mg/mL)") +
-          
-          theme(aspect.ratio = 1)
-        
-        # Store plots in reactive values
-        vals$p5 <- p1
-        vals$p6 <- p2
-        
-        # Arrange plots side by side
-        grid.arrange(p1, p2, ncol=2)
-        
-      }, height = 500, width = 1000)  # Adjusted width to accommodate two plots
-    })
-    
+    # Dynamic biorelevant solubility plot
+    output$biorelevant_plot <- renderPlot({
+      obs.br_processed <- S.ion.f(obs.br)
+      obs.br_processed <- Pred.br.f(obs.br_processed)
+      
+      plot_result <- create_biorelevant_pred_obs_plot(obs.br_processed)
+      
+      vals$p5 <- plot_result$p1
+      vals$p6 <- plot_result$p2
+      
+      plot_result$grid
+    }, height = 500, width = 1000)
+  
     output$downloadAQreport = downloadHandler(
       filename = function() {"AQreport.pdf"},
       content = function(file) {
