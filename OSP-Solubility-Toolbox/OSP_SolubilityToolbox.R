@@ -177,16 +177,26 @@ ui <- fluidPage(
                         ), br()
                       ),
                       
-                      mainPanel(h4(p("Upload observed solubility data and input the API properties, then press 'Estimate Km:w' 
-                                     in order to fit the micelle partitioning coefficient(s) to your data")),
-                                tableOutput("K.tab"),
-                                h5(p(textOutput("CopyPasteK"))),
-                                fluidRow(
-                                  column(3, uiOutput("updateK")),
-                                  column(3, offset = 1, uiOutput("plotPredObs"))
-                                ),                                plotOutput(outputId = "KpHRes"),
-                                plotOutput(outputId = "KbsRes"),
-                                plotOutput(outputId = "predicted_vs_observed_bs")
+                      mainPanel(
+                        # Header
+                        h4(p("Upload observed solubility data and input the API properties, then press 'Estimate Km:w' to fit the micelle partitioning coefficient(s)")),
+                        
+                        # Predicted vs Observed plot
+                        tags$h5(style = "font-size: 16px; font-weight: bold; color: black; font-family: Arial, sans-serif; margin-top: 15px; 
+                                margin-bottom: 10px; text-align: center", "Predicted vs Observed Biorelevant Solubility"),
+                        plotOutput(outputId = "biorelevant_plot", height = "500px"),
+                        
+                        # Vertical space to prevent overlap
+                        tags$div(style = "margin-top: 20px;"),
+                        
+                        # Km:w estimation results and residual plots
+                        h4(""),
+                        tableOutput("K.tab"),
+                        h5(p(textOutput("CopyPasteK"))),
+                        fluidRow(
+                          column(3, uiOutput("updateK"))
+                        ),
+                        plotOutput(outputId = "KpHRes")
                       )
              ),
              
@@ -434,9 +444,6 @@ server <- function(input, output, session) {
       output$updateK <- renderUI({
         actionButton("updateK", label = "Plot Residuals")
       })
-      output$plotPredObs <- renderUI({
-        actionButton("plotPredObs", label = "Plot Predicted vs. Observed")
-      })
     })
     
     observeEvent(input$updateK, {
@@ -450,61 +457,56 @@ server <- function(input, output, session) {
       })
     })
     
-    observeEvent(input$plotPredObs, {
-      output$predicted_vs_observed_bs <- renderPlot({
-        obs.br <- S.ion.f(obs.br)
-        obs.br <- Pred.br.f(obs.br)
+    output$biorelevant_plot <- renderPlot({
+      
+      # Process the data stored in the environment
+      obs.br_processed <- S.ion.f(obs.br)
+      obs.br_processed <- Pred.br.f(obs.br_processed)
+      
+      max_value <- max(max(obs.br_processed$BR.S_mg.ml, na.rm = TRUE), 
+                       max(obs.br_processed$Pred.br, na.rm = TRUE))
+      min_value <- min(min(obs.br_processed$BR.S_mg.ml[obs.br_processed$BR.S_mg.ml > 0], na.rm = TRUE), 
+                       min(obs.br_processed$Pred.br[obs.br_processed$Pred.br > 0], na.rm = TRUE))
+      
+      # linear scale plot:
+      p1 <- ggplot(obs.br_processed, aes(x = BR.S_mg.ml, y = Pred.br)) +
+        create_osp_theme() +
         
-        max_value <- max(max(obs.br$BR.S_mg.ml, na.rm = TRUE), 
-                         max(obs.br$Pred.br, na.rm = TRUE))
-        min_value <- min(min(obs.br$BR.S_mg.ml[obs.br$BR.S_mg.ml > 0], na.rm = TRUE), 
-                         min(obs.br$Pred.br[obs.br$Pred.br > 0], na.rm = TRUE))
+        geom_point(size=3, stroke = 0.5, color = "#2e6f8e") +
+        geom_abline(slope = 1, intercept = 0, linewidth = 0.75, linetype = "solid", color = "gray50") +
         
-        # linear scale plot:
-        p1 <- ggplot(obs.br, aes(x = BR.S_mg.ml, y = Pred.br)) +
-          create_osp_theme() +
-          
-          geom_point(size=3, stroke = 0.5, color = "blue") +
-          geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "red") +
-          
-          # Set identical limits and breaks for both axes
-          scale_x_continuous(limits = c(0, max_value * 1.1), expand = c(0, 0)) +
-          scale_y_continuous(limits = c(0, max_value * 1.1), expand = c(0, 0)) +
-          
-          labs(title = "Predicted vs Observed Biorelevant Solubility",
-               subtitle = paste0(API, " (Linear Scale)"),
-               x = "Observed Biorelevant Solubility (mg/mL)",
-               y = "Predicted Biorelevant Solubility (mg/mL)") +
-          
-          theme(aspect.ratio = 1)
+        scale_x_continuous(limits = c(0, max_value * 1.1), expand = c(0, 0)) +
+        scale_y_continuous(limits = c(0, max_value * 1.1), expand = c(0, 0)) +
         
-        # log scale plot:
-        p2 <- ggplot(obs.br, aes(x = BR.S_mg.ml, y = Pred.br)) +
-          create_osp_theme() +
-          
-          geom_point(size=3, stroke = 0.5, color = "blue") +
-          geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "red") +
-          
-          # Set log scales with identical limits
-          scale_x_log10(limits = c(min_value * 0.9, max_value * 1.1)) +
-          scale_y_log10(limits = c(min_value * 0.9, max_value * 1.1)) +
-          
-          labs(title = "Predicted vs Observed Biorelevant Solubility",
-               subtitle = paste0(API, " (Log Scale)"),
-               x = "Observed Biorelevant Solubility (mg/mL)",
-               y = "Predicted Biorelevant Solubility (mg/mL)") +
-          
-          theme(aspect.ratio = 1)
+        labs(subtitle = "Linear Scale",
+             x = "Observed Biorelevant Solubility (mg/mL)",
+             y = "Predicted Biorelevant Solubility (mg/mL)") +
         
-        # Store plots in reactive values
-        vals$p5 <- p1
-        vals$p6 <- p2
+        theme(aspect.ratio = 1)
+      
+      # log scale plot:
+      p2 <- ggplot(obs.br_processed, aes(x = BR.S_mg.ml, y = Pred.br)) +
+        create_osp_theme() +
         
-        # Arrange plots side by side
-        grid.arrange(p1, p2, ncol=2)
+        geom_point(size=3, stroke = 0.5, color = "#2e6f8e") +
+        geom_abline(slope = 1, intercept = 0, linewidth = 0.75, linetype = "solid", color = "gray50") +
         
-      }, height = 500, width = 1000)  # Adjusted width to accommodate two plots
-    })
+        scale_x_log10(limits = c(min_value * 0.9, max_value * 1.1)) +
+        scale_y_log10(limits = c(min_value * 0.9, max_value * 1.1)) +
+        
+        labs(subtitle = "Log Scale",
+             x = "Observed Biorelevant Solubility (mg/mL)",
+             y = "Predicted Biorelevant Solubility (mg/mL)") +
+        
+        theme(aspect.ratio = 1)
+      
+      vals$p5 <- p1
+      vals$p6 <- p2
+      
+      # Arrange plots side by side
+      grid.arrange(p1, p2, ncol=2)
+      
+    }, height = 500, width = 1000)  # Adjusted width to accommodate two plots
     
     output$downloadAQreport = downloadHandler(
       filename = function() {"AQreport.pdf"},

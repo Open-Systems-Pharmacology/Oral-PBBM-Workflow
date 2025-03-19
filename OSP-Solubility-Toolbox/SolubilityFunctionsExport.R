@@ -1140,20 +1140,30 @@ create_surface_ph_plot <- function(result_df, API_name) {
 #### Common Plot Theme ####
 create_osp_theme <- function() {
   theme(
-    axis.line = element_line(colour = "black", linewidth = 1, linetype = "solid"),
+    axis.line = element_line(colour = "black", linewidth = .5, linetype = "solid"),
     rect = element_rect(fill = "white", colour = "black", linewidth = 0.5, linetype = 1),
     
     axis.text = element_text(size = 14),
     axis.title = element_text(size = 16, face = "bold"),
     
     panel.background = element_rect(fill = "white", colour = "white", linewidth = 0.5, linetype = "solid"),
-    panel.grid.major = element_line(linewidth = 0.5, linetype = 'solid', colour = "lightgray"),
+    panel.grid.major = element_line(linewidth = 0.25, linetype = 'solid', colour = "lightgray"),
     panel.grid.minor = element_line(linewidth = 0.25, linetype = 'solid', colour = "lightgray"),
     
     legend.key = element_rect(fill = "white"),
+    legend.title = element_text(size = 16, face = "bold"),
+    legend.key.size = unit(1.5, "cm"),
+    legend.spacing.x = unit(0.5, "cm"),
+    legend.spacing.y = unit(0.5, "cm"),
+    legend.margin = margin(10, 10, 10, 10),
+    legend.background = element_rect(linewidth = 0.5, linetype = 'solid', color = 'black'),
+    legend.position = "bottom",
+    legend.box = "horizontal",
     
     plot.title = element_text(size = 18, face = "bold", hjust = 0.5),
     plot.subtitle = element_text(size = 16, hjust = 0.5),
-    plot.margin = unit(c(.4, .4, .2, .5), 'cm')
+    plot.margin = unit(c(.4, .4, .2, .5), 'cm'),
+    
+    aspect.ratio = 1
   )
 }
