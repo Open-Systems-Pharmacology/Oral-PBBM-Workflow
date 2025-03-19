@@ -457,57 +457,19 @@ server <- function(input, output, session) {
       })
     })
     
+    # Dynamic biorelevant solubility plot
     output$biorelevant_plot <- renderPlot({
-      
-      # Process the data stored in the environment
       obs.br_processed <- S.ion.f(obs.br)
       obs.br_processed <- Pred.br.f(obs.br_processed)
       
-      max_value <- max(max(obs.br_processed$BR.S_mg.ml, na.rm = TRUE), 
-                       max(obs.br_processed$Pred.br, na.rm = TRUE))
-      min_value <- min(min(obs.br_processed$BR.S_mg.ml[obs.br_processed$BR.S_mg.ml > 0], na.rm = TRUE), 
-                       min(obs.br_processed$Pred.br[obs.br_processed$Pred.br > 0], na.rm = TRUE))
+      plot_result <- create_biorelevant_pred_obs_plot(obs.br_processed)
       
-      # linear scale plot:
-      p1 <- ggplot(obs.br_processed, aes(x = BR.S_mg.ml, y = Pred.br)) +
-        create_osp_theme() +
-        
-        geom_point(size=3, stroke = 0.5, color = "#2e6f8e") +
-        geom_abline(slope = 1, intercept = 0, linewidth = 0.75, linetype = "solid", color = "gray50") +
-        
-        scale_x_continuous(limits = c(0, max_value * 1.1), expand = c(0, 0)) +
-        scale_y_continuous(limits = c(0, max_value * 1.1), expand = c(0, 0)) +
-        
-        labs(subtitle = "Linear Scale",
-             x = "Observed Biorelevant Solubility (mg/mL)",
-             y = "Predicted Biorelevant Solubility (mg/mL)") +
-        
-        theme(aspect.ratio = 1)
+      vals$p5 <- plot_result$p1
+      vals$p6 <- plot_result$p2
       
-      # log scale plot:
-      p2 <- ggplot(obs.br_processed, aes(x = BR.S_mg.ml, y = Pred.br)) +
-        create_osp_theme() +
-        
-        geom_point(size=3, stroke = 0.5, color = "#2e6f8e") +
-        geom_abline(slope = 1, intercept = 0, linewidth = 0.75, linetype = "solid", color = "gray50") +
-        
-        scale_x_log10(limits = c(min_value * 0.9, max_value * 1.1)) +
-        scale_y_log10(limits = c(min_value * 0.9, max_value * 1.1)) +
-        
-        labs(subtitle = "Log Scale",
-             x = "Observed Biorelevant Solubility (mg/mL)",
-             y = "Predicted Biorelevant Solubility (mg/mL)") +
-        
-        theme(aspect.ratio = 1)
-      
-      vals$p5 <- p1
-      vals$p6 <- p2
-      
-      # Arrange plots side by side
-      grid.arrange(p1, p2, ncol=2)
-      
-    }, height = 500, width = 1000)  # Adjusted width to accommodate two plots
-    
+      plot_result$grid
+    }, height = 500, width = 1000)
+  
     output$downloadAQreport = downloadHandler(
       filename = function() {"AQreport.pdf"},
       content = function(file) {
