@@ -538,7 +538,7 @@ plot.RES.bs.br.f <- function (obs.br) {
 
 # Calculate Diffusion Coefficient based on OSP equation
 calculate_diffusion_coefficient <- function(MW.API) {
-  diffusion_coeff <- (60 * 10^(-4.113 -0.4609 *log(MW.API,10)) *1E-2)*100/60     # Equation implemented in PK-Sim/MoBi for calculating aqueous diffusion coefficient, output in cm²/s
+  diffusion_coeff <- (60 * 10^(-4.113 -0.4609 *log(MW.API,10)) *1E-2)*100/60     # Equation implemented in PK-Sim/MoBi, output in cm²/s. Equation reported in: Avdeef A, et al. Eur J Pharm Sci. 2004. doi: 10.1016/j.ejps.2004.04.009. PMID: 15265506
 
   return(diffusion_coeff)
 }
