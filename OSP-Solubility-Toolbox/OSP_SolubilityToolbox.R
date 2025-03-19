@@ -21,11 +21,32 @@ ui <- fluidPage(
         background-color: #cccccc !important;
         border-color: #cccccc !important;
       }
+      
       .input-disabled {
       opacity: 0.65;
       background-color: #f5f5f5 !important;
       cursor: not-allowed;
-    }
+      }
+      
+      .save-load-panel {
+        background-color: #f8f9fa;
+        padding: 10px;
+        border-radius: 5px;
+        margin-bottom: 10px;
+        border: 1px solid #dee2e6;
+      }
+      
+      .btn-block {
+        display: block;
+        width: 100%;
+      }
+
+      hr {
+        margin-top: 15px;
+        margin-bottom: 15px;
+        border: 0;
+        border-top: 1px solid rgba(0, 0, 0, 0.1);
+      }
   "))
   ),
   
@@ -38,6 +59,25 @@ ui <- fluidPage(
                       # Sidebar layout with a input and output definitions
                       sidebarLayout(
                         sidebarPanel(
+                          # Save/Load Settings section at the top of the sidebar
+                          div(class = "save-load-panel",
+                              h3(p("Save/Load Settings")),
+                              fluidRow(
+                                column(6, downloadButton("saveSettings", "Save Settings", class = "btn-block")),
+                                column(6, style = "margin-top: 5px;", 
+                                       actionButton("showLoadDialog", "Load Settings", class = "btn-block"))
+                              ),
+                              conditionalPanel(
+                                condition = "input.showLoadDialog > 0",
+                                div(
+                                  style = "margin-top: 10px;",
+                                  fileInput("loadSettings", NULL, accept = ".rds"),
+                                  textOutput("loadMessage")
+                                )
+                              ),
+                              hr()
+                          ),
+                          
                           h3(p("API properties")),
                           textInput("API", label = "Active Pharmaceutical Ingredient (API):", value = "Name"),
                           fluidRow(
@@ -301,6 +341,255 @@ ui <- fluidPage(
 
 #### Server for solubility fittings ----
 server <- function(input, output, session) {
+  
+  ### Server Code for Saving/Loading ####
+  # Reactive value to store load message
+  load_message <- reactiveVal("")
+  
+  # Reactive value to store application state
+  app_state <- reactiveValues(
+    obs_data_loaded = FALSE,
+    SG_estimated = FALSE,
+    Kmw_estimated = FALSE,
+    surface_pH_calculated = FALSE,
+    obs_data_content = NULL  # Store the actual observed data content
+  )
+  
+  # Function to collect all input values and application state
+  collectAppState <- function() {
+    # Create a list to store all state
+    state <- list()
+    
+    # 1. Store all input values
+    input_values <- reactiveValuesToList(input)
+    
+    # Remove file inputs and UI control inputs
+    input_values$obs.file <- NULL
+    input_values$loadSettings <- NULL
+    input_values$showLoadDialog <- NULL
+    
+    state$inputs <- input_values
+    
+    # 2. Store reactive values
+    state$reactive_values <- list(
+      # Store vals reactive values
+      vals = list(
+        p1 = if(exists("vals") && !is.null(vals$p1)) TRUE else FALSE,
+        p2 = if(exists("vals") && !is.null(vals$p2)) TRUE else FALSE,
+        p3 = if(exists("vals") && !is.null(vals$p3)) TRUE else FALSE,
+        p4 = if(exists("vals") && !is.null(vals$p4)) TRUE else FALSE,
+        p5 = if(exists("vals") && !is.null(vals$p5)) TRUE else FALSE,
+        p6 = if(exists("vals") && !is.null(vals$p6)) TRUE else FALSE,
+        output_df = if(exists("vals") && !is.null(vals$output_df)) vals$output_df else NULL
+      ),
+      
+      # Store app state flags
+      app_state = reactiveValuesToList(app_state)
+    )
+    
+    # 3. Store calculated/fitted values
+    state$calculated_values <- list(
+      # Solubility parameters
+      base = if(exists("base")) base else NULL,
+      S_ref = if(exists("S_ref")) S_ref else NULL,
+      S_int = if(exists("S_int")) S_int else NULL,
+      
+      # Store fitted parameters
+      SG_results = if(exists("SG.Est.f") && app_state$SG_estimated) SG.Est.f()$t else NULL,
+      Kmw_results = if(exists("Kmw.est.f") && app_state$Kmw_estimated) Kmw.est.f()$t else NULL
+    )
+    
+    return(state)
+  }
+  
+  # Save settings to RDS file
+  output$saveSettings <- downloadHandler(
+    filename = function() {
+      paste0("OSP_Solubility_Settings_", format(Sys.time(), "%Y%m%d_%H%M%S"), ".rds")
+    },
+    content = function(file) {
+      state <- collectAppState()
+      saveRDS(state, file)
+    }
+  )
+  
+  # Toggle load settings dialog
+  observeEvent(input$showLoadDialog, {
+    # Reset load message when dialog is shown
+    load_message("")
+  })
+  
+  # Load settings from RDS file
+  observeEvent(input$loadSettings, {
+    req(input$loadSettings)
+    
+    # Show a progress notification
+    withProgress(message = "Loading settings...", value = 0, {
+      tryCatch({
+        state <- readRDS(input$loadSettings$datapath)
+        
+        # Update progress
+        incProgress(0.2, detail = "Reading settings file")
+        
+        # 1. Restore input values
+        if (!is.null(state$inputs)) {
+          input_names <- names(state$inputs)
+          total_inputs <- length(input_names)
+          
+          for (i in seq_along(input_names)) {
+            name <- input_names[i]
+            value <- state$inputs[[name]]
+            
+            # Skip certain inputs
+            if (name %in% c("loadSettings", "showLoadDialog", "obs.file")) {
+              next
+            }
+            
+            # Update the input
+            updateInput(session, name, value)
+            
+            # Update progress
+            incProgress(0.4 * i/total_inputs, detail = paste("Updating input", i, "of", total_inputs))
+          }
+        }
+        
+        # 2. Restore reactive values
+        incProgress(0.6, detail = "Restoring application state")
+        if (!is.null(state$reactive_values)) {
+          # Restore app state flags
+          if (!is.null(state$reactive_values$app_state)) {
+            for (name in names(state$reactive_values$app_state)) {
+              app_state[[name]] <- state$reactive_values$app_state[[name]]
+            }
+          }
+          
+          # Restore vals reactive values
+          if (!is.null(state$reactive_values$vals) && exists("vals")) {
+            if (!is.null(state$reactive_values$vals$output_df)) {
+              vals$output_df <- state$reactive_values$vals$output_df
+            }
+          }
+        }
+        
+        # 3. Restore calculated values
+        incProgress(0.8, detail = "Restoring calculated values")
+        if (!is.null(state$calculated_values)) {
+          # Restore calculated values
+          if (!is.null(state$calculated_values$base)) {
+            base <<- state$calculated_values$base
+          }
+          if (!is.null(state$calculated_values$S_ref)) {
+            S_ref <<- state$calculated_values$S_ref
+          }
+          if (!is.null(state$calculated_values$S_int)) {
+            S_int <<- state$calculated_values$S_int
+          }
+        }
+        
+        # 4. Make API properties non-editable
+        incProgress(0.9, detail = "Make API properties non-editable")
+        shinyjs::disable("LogP")
+        shinyjs::disable("MW.API")
+        shinyjs::disable("MW.unit")
+        shinyjs::addClass("LogP", "input-disabled")
+        shinyjs::addClass("MW.API", "input-disabled")
+        shinyjs::addClass("MW.unit", "input-disabled")
+        
+        incProgress(1, detail = "Complete")
+        if (is.null(state$observed_data)) {
+          load_message("Settings loaded successfully! Please note that the observed data were not included in the RDS file. 
+                       To proceed, please re-import the observed data from the Excel file.")
+        }
+        
+      }, error = function(e) {
+        load_message(paste("Error loading settings:", e$message))
+      })
+    })
+  })
+  
+  # Display load message
+  output$loadMessage <- renderText({
+    load_message()
+  })
+  
+  # Helper function to update any input type
+  updateInput <- function(session, inputId, value) {
+    tryCatch({
+      if (!is.null(value)) {
+        # Handle different input types
+        if (grepl("^CT[0-2]$", inputId)) {
+          # Handle CT0, CT1, CT2 select inputs
+          updateSelectInput(session, inputId, selected = as.character(value))
+        } else if (grepl("^pKa[0-2]$", inputId)) {
+          # Handle pKa numeric inputs
+          updateNumericInput(session, inputId, value = as.numeric(value))
+        } else if (inputId == "SG_I") {
+          # Handle SG_I numeric input
+          updateNumericInput(session, inputId, value = as.numeric(value))
+        } else if (inputId == "IE.Kn" || inputId == "IE.Ki") {
+          # Handle IE.Kn and IE.Ki numeric inputs
+          updateNumericInput(session, inputId, value = as.numeric(value))
+        } else if (inputId == "API") {
+          # Handle API text input
+          updateTextInput(session, inputId, value = as.character(value))
+        } else if (inputId == "LogP" || inputId == "MW.API") {
+          # Handle autonumeric inputs
+          session$sendInputMessage(inputId, list(value = as.numeric(value)))
+        } else if (inputId == "MW.unit" || inputId == "ref_unit" || inputId == "int_unit") {
+          # Handle unit select inputs
+          updateSelectInput(session, inputId, selected = as.character(value))
+        } else if (inputId == "ref_pH" || inputId == "ref_sol" || inputId == "int_pH" || inputId == "int_sol") {
+          # Handle autonumeric inputs
+          session$sendInputMessage(inputId, list(value = as.numeric(value)))
+        } else if (inputId == "fit_scale" || inputId == "sg_fit_scale") {
+          # Handle radio buttons
+          updateRadioButtons(session, inputId, selected = as.character(value))
+        } else if (inputId == "disp") {
+          # Handle display radio buttons
+          updateRadioButtons(session, inputId, selected = as.character(value))
+        } else if (inputId == "BT" || inputId == "BcarB" || inputId == "Salt") {
+          # Handle select inputs
+          updateSelectInput(session, inputId, selected = as.character(value))
+        } else if (inputId == "DH" || inputId == "DOH" || inputId == "C_buffer" || 
+                   inputId == "pKaYH" || inputId == "DYH" || inputId == "DX" || 
+                   inputId == "DAPI" || inputId == "S0" || inputId == "Ksp") {
+          # Handle numeric inputs
+          updateNumericInput(session, inputId, value = as.numeric(value))
+        }
+        # Add more input types as needed
+      }
+    }, error = function(e) {
+      # Log error but continue
+      message(paste("Error updating input", inputId, ":", e$message))
+    })
+  }
+  
+  # Track application state
+  observeEvent(input$obs.file, {
+    app_state$obs_data_loaded <- TRUE
+  })
+  
+  observeEvent(input$SGfit, {
+    app_state$SG_estimated <- TRUE
+  })
+  
+  observeEvent(input$Kfit, {
+    app_state$Kmw_estimated <- TRUE
+  })
+  
+  observeEvent(input$calc_pH, {
+    app_state$surface_pH_calculated <- TRUE
+  })
+  
+  # Add custom message handler for simulating button clicks
+  session$onSessionEnded(function() {
+    isolate({
+      # Clean up code if needed
+    })
+  })
+  
+  
+  ### Rest of Server Code ####
   
   calc_status <- reactiveVal(TRUE)
   vals <- reactiveValues(p1=NULL,p2=NULL,p3=NULL,p4=NULL,p5=NULL,output_df = NULL)
@@ -637,4 +926,6 @@ server <- function(input, output, session) {
 }
 
 #### Shiny app ----
-shinyApp(ui = ui, server = server)
+shinyApp(ui = ui, server = server, options = list(
+  shiny.maxRequestSize = 100*1024^2     # Set maximum request size for RDS loading to 100MB
+))
