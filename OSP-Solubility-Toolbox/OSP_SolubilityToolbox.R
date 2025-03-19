@@ -250,12 +250,37 @@ ui <- fluidPage(
                                      min = 0, step = 1e-7),
                         em(textOutput("S0_suggested")), br(),
                         
+                        # Input fields related to salts - disabled and greyed out as currently not fully implemented
                         fluidRow(
-                          column(6, selectInput("Salt", "Salt:", 
-                                                choices = list("No" = 0),
-                                                selected = 0)),
-                          column(6, numericInput("Ksp", "Salt solubility product [M²]:", value = 0,
-                                                 min = 0, step = 0.01))
+                          column(6, 
+                                 div(
+                                   class = "form-group input-disabled",
+                                   style = "opacity: 0.65;",
+                                   tags$label("Salt:", `for` = "Salt"),
+                                   tags$select(
+                                     id = "Salt",
+                                     class = "form-control",
+                                     disabled = "disabled",
+                                     tags$option(value = 0, selected = TRUE, "No")
+                                   )
+                                 )
+                          ),
+                          column(6, 
+                                 div(
+                                   class = "form-group input-disabled",
+                                   style = "opacity: 0.65;",
+                                   tags$label("Salt solubility product [M²]:", `for` = "Ksp"),
+                                   tags$input(
+                                     id = "Ksp",
+                                     type = "number",
+                                     class = "form-control",
+                                     value = "0",
+                                     min = "0",
+                                     step = "0.01",
+                                     disabled = "disabled"
+                                   )
+                                 )
+                          )
                         ),
                         
                         actionButton("calc_pH", "Calculate Surface pH", class = "btn-primary")
