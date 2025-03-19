@@ -60,22 +60,21 @@ ui <- fluidPage(
                       sidebarLayout(
                         sidebarPanel(
                           # Save/Load Settings section at the top of the sidebar
-                          div(class = "save-load-panel",
-                              h3(p("Save/Load Settings")),
-                              fluidRow(
-                                column(6, downloadButton("saveSettings", "Save Settings", class = "btn-block")),
-                                column(6, style = "margin-top: 5px;", 
-                                       actionButton("showLoadDialog", "Load Settings", class = "btn-block"))
-                              ),
-                              conditionalPanel(
-                                condition = "input.showLoadDialog > 0",
-                                div(
-                                  style = "margin-top: 10px;",
-                                  fileInput("loadSettings", NULL, accept = ".rds"),
-                                  textOutput("loadMessage")
-                                )
-                              ),
-                              hr()
+                          div(
+                            h3(p("Save/Load Settings")),
+                            fluidRow(
+                              column(6, downloadButton("saveSettings", "Save Settings", class = "btn-block")),
+                              column(6, actionButton("showLoadDialog", "Load Settings", class = "btn-block"))
+                            ),
+                            conditionalPanel(
+                              condition = "input.showLoadDialog > 0",
+                              div(
+                                style = "margin-top: 10px;",
+                                fileInput("loadSettings", NULL, accept = ".rds"),
+                                textOutput("loadMessage")
+                              )
+                            ),
+                            hr()
                           ),
                           
                           h3(p("API properties")),
@@ -189,7 +188,7 @@ ui <- fluidPage(
                                                     decimalPlaces = 2, digitGroupSeparator = ",", decimalCharacter = ".")
                           ),
                           column(3, offset = 1,autonumericInput("int_sol", "Intrinsic Sol.:", min=0, max=1e4, value=0, width = "130px",
-                                                                decimalPlaces = 8, digitGroupSeparator = ",", decimalCharacter = ".")
+                                                                decimalPlaces = 7, digitGroupSeparator = ",", decimalCharacter = ".")
                           ),
                           column(3, offset = 1,selectInput(inputId = "int_unit",label = "Unit:", choices = c("mg/ml","ug/ml","ng/ml","pg/ml",
                                                                                                              "g/l","mg/l","ug/l","ng/l","pg/l",
@@ -488,6 +487,7 @@ server <- function(input, output, session) {
         
         # 4. Make API properties non-editable
         incProgress(0.9, detail = "Make API properties non-editable")
+        shinyjs::disable("API")
         shinyjs::disable("LogP")
         shinyjs::disable("MW.API")
         shinyjs::disable("MW.unit")
@@ -497,7 +497,7 @@ server <- function(input, output, session) {
         
         incProgress(1, detail = "Complete")
         if (is.null(state$observed_data)) {
-          load_message("Settings loaded successfully! Please note that the observed data were not included in the RDS file. 
+          load_message("Settings loaded successfully! Please note that the observed data were not included in the *.rds file. 
                        To proceed, please re-import the observed data from the Excel file.")
         }
         
