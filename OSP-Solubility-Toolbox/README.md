@@ -17,7 +17,7 @@ To use the OSP Solubility Toolbox, ensure you have the following installed:
 - RStudio (recommended for development)
 - Required R packages (see the list below)
 
-## Usage
+## Getting Started
 
 To use the OSP Solubility Toolbox, follow these steps:
 
@@ -31,32 +31,21 @@ To use the OSP Solubility Toolbox, follow these steps:
    ```
 
    
-3. **Start the Shiny App**: Click on "Run App" in the top right corner of the Source Panel to start the Shiny App. Alternatively, the Shiny App can be started via the following code:
+3. **Start the Shiny App**: To launch the Sihny App, click on "Run App" in the top right corner of the Source Panel. Alternatively, you can start the Shiny App by executing the following command in the R console:
 
    ```R
    runApp('OSP_SolubilityToolbox.R')
    ```
-
-
-4. **Input API Properties:** A new window will open with a graphical user interface (GUI). In the first tab (API Properties), manually enter the drug name, lipophilicity, and molecular weight (MW). Load your solubility data by clicking on the "Browse" button and selecting your Excel file `SolubilityData.xlsx` populated with data.
-
-
-5. **Fit Aqueous Solubility Parameters:** In the second tab (Aqueous Solubility), enter the pKa values and types as well as the reference solubility and pH. Select the scaling method used during parameter optimization:
-   * Linear scaling method: Minimizes the sum of squared residuals of the actual values
-   * Logarithmic scaling method: Minimizes the sum of squared residuals of the log-transformed values
-     
-   Click on "Estimate SG" to fit the `Solubility Gain per charge factor`. The solubility-pH profile will be plotted on the right panel alongside the solubility estimated by PK-Sim. You may need to manually adjust the starting values to improve convergence of the fit (the plot updates automatically with manual changes).
    
-   Residual plots can be displayed by clicking on the respective button below the solubility-pH profile. Please note that these plots will not updated automatically with manual changes of the `Solubility Gain per charge factor`.
+   Once the app is running, a new window will open displaying the graphical user interface (GUI) of the OSP Solubility Toolbox. The GUI consists of the following four tabs that should be completed consecutively:
+      *  API Properties
+      *  Aqueous SOlubility
+      *  Biorelevant Solubility
+      *  Surface pH
+
+## Detailed Usage Instructions
 
 
-6. **Fit Biorelevant Solubility Parameters:** In the third tab (Biorelevant Solubility), enter a value for the intrisic solubility and pH (an automatically claulcted value for the intrisic solubility and pH is suggested below the input fields) and select the scaling method used during parameter optimization. 
-
-   Fit the water-to-micelles partition coefficients for the ionized and non-ionized API by clicking on "Estimate Km" (if solubility data from biorelevant media is available).
-
-   Predicted vs. observed solubilities and residual plots can be displayed by clicking on the respective buttons. Please note that these plots will not updated automatically with manual changes of the input values.
-
-   As with the previous step, you may need to manually adjust the starting values to ensure convergence of the fit. Feel free to experiment with different values; the fit will run automatically as you enter new data in the fields.
 
 ## Code of conduct
 Everyone interacting in the Open Systems Pharmacology community (codebases, issue trackers, chat rooms, mailing lists etc...) is expected to follow the Open Systems Pharmacology [code of conduct](https://github.com/Open-Systems-Pharmacology/Suite/blob/master/CODE_OF_CONDUCT.md#contributor-covenant-code-of-conduct).
