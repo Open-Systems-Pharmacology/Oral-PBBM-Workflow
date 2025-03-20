@@ -61,7 +61,7 @@ Enter your aqueous solubility data in the first sheet, **Observed.Aqueous**. The
       * Molar concentration units: `m`, `mm`, `um`, `nm`, `mol/l`, `mmol/l`, `umol/l`, `nmol/l`
       * Mass concentration units: `g/l`, `mg/l`, `ug/l`, `ng/l`, `pg/l`, `mg/dl`, `ug/dl`, `ng/dl`, `pg/dl`, `mg/ml`, `ug/ml`, `ng/ml`, `pg/ml`
    * `SD.aq.Sol`: Arithmetic standard deviation of solubility value (optional).
-   * `SD.aq_unit`: Unit of the arithmetic standard deviation. The same units as `Obs.aq_unit` are allowed (optional).
+   * `SD.aq_unit`: Unit of the arithmetic standard deviation (optional). The same units as `Obs.aq_unit` are allowed.
 
 #### Biorelevant Solubility Data 
 
