@@ -47,11 +47,11 @@ To use the OSP Solubility Toolbox, follow these steps:
 
 ### 1. Prepare Observed Data
 
-Populate the data template file [SolubilityData.xlsx](https://github.com/Open-Systems-Pharmacology/Oral-PBBM-Workflow/blob/main/OSP-Solubility-Toolbox/SolubilityData.xlsx) with your solubility data in aqueous and biorelevant media. 
+Populate the data template file [*SolubilityData.xlsx*](https://github.com/Open-Systems-Pharmacology/Oral-PBBM-Workflow/blob/main/OSP-Solubility-Toolbox/SolubilityData.xlsx) with your solubility data in aqueous and biorelevant media. 
 
 #### Aqueous Solubility Data 
 
-Enter your aqueous solubility data in the first sheet, titled `Observed.Aqueous`. The columns are defined as follows:
+Enter your aqueous solubility data in the first sheet, **Observed.Aqueous**. The columns are defined as follows:
    * `ID.aq`: Unique identified for each experiment.
    * `Source`: Source of the reported solubility value.
    * `Medium`: Medium in which the solubility was measured.
@@ -65,7 +65,7 @@ Enter your aqueous solubility data in the first sheet, titled `Observed.Aqueous`
 
 #### Biorelevant Solubility Data 
 
-Enter your solubility data measured in biorelevant media in the second sheet, titled `Observed.Biorelevant`. The columns are defined as follows:
+Enter your solubility data measured in biorelevant media in the second sheet, **Observed.Biorelevant**. The columns are defined as follows:
    * `ID.BR`: Unique identified for each experiment.
    * `Source`: Source of the reported solubility value.
    * `Name`: Name of the biorelevant medium (e.g. FaSSIF, FeSSIF).
@@ -78,21 +78,21 @@ Enter your solubility data measured in biorelevant media in the second sheet, ti
 
 ### 2. Define API Properties and Import Data in Shiny App
 
-Start the OSP Solubility Toolbox as Shiny App as described above. A window will open displaying the first tab of the app, titled `API Properties`. In this tab, you can define the basic properties of the compound, import observed data, and save or load user settings. 
+Start the OSP Solubility Toolbox as Shiny App as described above. A window will open displaying the first tab of the app, titled **API Properties**. In this tab, you can define the basic properties of the compound, import observed data, and save or load user settings. 
 
-In the section `Save/Load Settings` you can save the settings (user-defined input values) of the current session or load the settings from a previous session. 
+In the section **Save/Load Settings** you can save the settings (user-defined input values) of the current session or load the settings from a previous session. 
 Please note that observed data, fit results, and figures are not saved. If you load user-defined input values from a previous session, the observed data need to be imported again separately.
 
-If you are starting a new project, manually enter the following information about your compound in the section `API Properties`:
+If you are starting a new project, manually enter the following information about your compound in the section **API Properties**:
 * `Active Pharmaceutical Ingredient (API):` The name of the active pharmaceutical ingredient (API).
 * `LogP`: The lipophilicity value of the API, typically represented as logP or logD.
 * `Mol. Wt.`: The molecular weight of the API in g/mol.
 
-Next, load your solubility data by clicking on the `Browse` button in the section `Observed Solubilities`. Select your prepared Excel file, `SolubilityData.xlsx`, which contains the necessary solubility data.
+Next, load your solubility data by clicking on the `Browse` button in the section **Observed Solubilities**. Select your prepared Excel file, *SolubilityData.xlsx*, which contains the necessary solubility data.
 
 ### 3. Fit Aqueous Solubility Parameters
 
-Proceed to the second tab, `Aqueous Solubility`. In this section, you will fit the `Solubility Gain per charge`, which modulates the solubility-pH profile. 
+Proceed to the second tab, **Aqueous Solubility**. In this section, you will fit the `Solubility Gain per charge`, which modulates the solubility-pH profile. 
 Enter the following parameters for your compound:
 * `pKa type`and `Value`: Define up to three pKa values of the compound along with their corresponding types.
 * `Ref. pH` and `Solubility`: Enter the reference solubility value for the compound and the pH of the solution in which the reference solubility was measured.
@@ -111,13 +111,13 @@ You can also view residual plots by clicking on the respective button below the 
 
 ### 4. Fit Biorelevant Solubility Parameters
 
-Next, navigate to the third tab, `Biorelevant Solubility`. Here, you will fit the water-to-micelle partition coefficients for the ionized and unionized compound species, if solubility data from biorelevant media is available.
+Next, navigate to the third tab, **Biorelevant Solubility**. Here, you will fit the water-to-micelle partition coefficients for the ionized and unionized compound species, if solubility data from biorelevant media is available.
 
 To do so, enter the following information:
 * `Intrinsic Sol.` and `pH (intrinsic)`: Input the intrinsic solubility value for the compound and the pH at which the intrinsic solubility is measured. An automatically calculated value for intrinsic solubility and pH will be suggested below the input fields.
 * `Log Km:w (neutral)` and `Log Km:w (ionized)`: Logarithm of the water-to-micelle partition coefficient for the unionized and ionized compound, respectively. These values will be fitted.
 
-A plot showing predicted vs. observed biorelevant solubilities will be displayed. This figure is dynamic and will update if you change input values for relevant parameters in the tabs `Aqueous Solubility` and `Biorelevant Solubility`. 
+A plot showing predicted vs. observed biorelevant solubilities will be displayed. This figure is dynamic and will update if you change input values for relevant parameters in the tabs **Aqueous Solubility** and **Biorelevant Solubility**. 
 
 Select the scaling method for parameter optimization. Fit the water-to-micelles partition coefficients for both the ionized and non-ionized compound species by clicking on the `Estimate Km` button. As with the previous step, you may need to manually adjust the starting values to ensure convergence of the fit. Feel free to experiment with different values; the fit will automatically update as you enter new data into the respective fields.
 
