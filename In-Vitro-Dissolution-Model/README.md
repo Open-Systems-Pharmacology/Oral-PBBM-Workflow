@@ -4,6 +4,13 @@ This folder contains the *in vitro* dissolution model developed by Vrenken et al
 It accounts for the influence of bile salt micelles on solubility, as well as the effects of particle size and hydrodynamic conditions on the diffusion layer thickness during the dissolution process.
 The model is built upon the [OSP Solubility Toolbox](https://github.com/AndreDlm/Oral-PBBM-Workflow/tree/main/OSP-Solubility-Toolbox), with several parameters in this dissolution model derived from the OSP Solubility Toolbox.
 
+## Prerequisites
+
+To use the OSP Solubility Toolbox, ensure you have the [OSP Software Suite](https://github.com/Open-Systems-Pharmacology/Suite/releases) installed (version 11.3 or higher).
+
+## Usage
+
+Adjust the following parameter values in the Parameter Start Values Building Block `API Properties`:
 
 ## Code of conduct
 Everyone interacting in the Open Systems Pharmacology community (codebases, issue trackers, chat rooms, mailing lists etc...) is expected to follow the Open Systems Pharmacology [code of conduct](https://github.com/Open-Systems-Pharmacology/Suite/blob/master/CODE_OF_CONDUCT.md#contributor-covenant-code-of-conduct).
