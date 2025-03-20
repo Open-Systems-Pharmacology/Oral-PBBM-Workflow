@@ -21,7 +21,7 @@ To use the OSP Solubility Toolbox, ensure you have the following installed:
 
 To use the OSP Solubility Toolbox, follow these steps:
 
-1. **Prepare Your Data:** Enter the solubility data and physicochemical properties of your compound into the Excel template file `SolubilityData.xlsx`. 
+1. **Prepare Your Data:** Enter the solubility data and physicochemical properties of your compound into the Excel template file *SolubilityData.xlsx*. 
 
 
 2. **Open the R Script:** Open `OSP_SolubilityToolbox.R` in RStudio and install the required R packages (if not already installed):
