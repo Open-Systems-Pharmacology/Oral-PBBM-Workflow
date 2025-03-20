@@ -94,9 +94,9 @@ Next, load your solubility data by clicking on the `Browse` button in the sectio
 
 Proceed to the second tab, `Aqueous Solubility`. In this section, you will fit the `Solubility Gain per charge`, which modulates the solubility-pH profile. 
 Enter the following parameters for your compound:
-* pKa Values and Types: Input the pKa values of the API along with their corresponding types.
-* Reference Solubility: Enter the reference solubility value for the API.
-* pH: Specify the pH of the solution in which the reference solubility was measured.
+* `pKa type`and `Value`: Define up to three pKa values of the compound along with their corresponding types.
+* `Ref. pH` and `Solubility`: Enter the reference solubility value for the compound and the pH of the solution in which the reference solubility was measured.
+* `Solubility Gain per charge`: Value will be fitted.
 
 A solubility-pH profile will be generated and displayed on the right panel, alongside the solubility estimated by PK-Sim using the `Solubility Gain per charge` value defined in the respective input field. 
 This figure is dynamic and will update if you modify the value for `Solubility Gain per charge`.
@@ -114,8 +114,8 @@ You can also view residual plots by clicking on the respective button below the 
 Next, navigate to the third tab, `Biorelevant Solubility`. Here, you will fit the water-to-micelle partition coefficients for the ionized and unionized compound species, if solubility data from biorelevant media is available.
 
 To do so, enter the following information:
-* Intrinsic Solubility: Input the intrinsic solubility value for the API. An automatically calculated value for intrinsic solubility and pH will be suggested below the input fields.
-* pH: Enter the pH at which the intrinsic solubility is measured or calculated.
+* `Intrinsic Sol.` and `pH (intrinsic)`: Input the intrinsic solubility value for the compound and the pH at which the intrinsic solubility is measured. An automatically calculated value for intrinsic solubility and pH will be suggested below the input fields.
+* `Log Km:w (neutral)` and `Log Km:w (ionized)`: Logarithm of the water-to-micelle partition coefficient for the unionized and ionized compound, respectively. These values will be fitted.
 
 A plot showing predicted vs. observed biorelevant solubilities will be displayed. This figure is dynamic and will update if you change input values for relevant parameters in the tabs `Aqueous Solubility` and `Biorelevant Solubility`. 
 
