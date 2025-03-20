@@ -70,11 +70,23 @@ Enter your solubility data measured in biorelevant media in the second sheet, **
    * `Source`: Source of the reported solubility value.
    * `Name`: Name of the biorelevant medium (e.g. FaSSIF, FeSSIF).
    * `pH.BR`: pH value of the biorelevant medium.
-   * `BS_mM`: Molar concentration of bile salts present in the biorelevant medium, expressed in millimolar. The table below lists molar concentrations of bile salts in the most commonly used biorelevant media.
+   * `BS_mM`: Molar concentration of bile salts present in the biorelevant medium, expressed in millimolar. Table 1 below lists molar concentrations of bile salts in the most commonly used biorelevant media.
    * `Obs.BR.sol`: Observed solubility of the compound in the biorelevant medium. The input must be a numeric value.
    * `Obs.BR_unit`: Unit of solubility. Input should match one of the allowed units for the column `Obs.aq_unit` in the aqueous solubility sheet.
    * `SD.BR.Sol`: Arithmetic standard deviation of the solubility value (optional).
    * `SD.BR_unit`: Unit of the arithmetic standard deviation. The same units as `Obs.BR_unit` are allowed (optional).
+
+**Table 1: pH values and bile salt concentrations of several biorelevant media**
+| Medium    | pH  | Bile Salt Concentration [mM] |
+| --------- | --- | ---------------------------- |
+| FaSSGF    | 1.6 | 0.08 |
+| FaSSIF-V1 | 6.5 | 3.0 |
+| FaSSIF-V2 | 6.5 | 3.0 |
+| FeSSIF-V1 | 5.0 | 15  |
+| FeSSIF-V2 | 5.8 | 10  |
+
+Source: Markopoulos et al. [[2](#References)].
+
 
 ### 2. Define API Properties and Import Data in Shiny App
 
@@ -134,3 +146,5 @@ The framework is distributed under the [GPLv2 License](https://github.com/Open-S
 
 ## References
 [1] [Vrenken P, Vertzoni M, Frechen S, Solodenko J, Meyer M, Muenster U, Dallmann A. Development of a novel Physiologically Based Biopharmaceutics modeling (PBBM) framework using the Open Systems Pharmacology Suite, Part 1: in vitro modeling of Vericiguat. *Eur J Pharm Sci.* 2025.](https://github.com/Open-Systems-Pharmacology/Oral-PBBM-Workflow)
+
+[2] [Markopoulos C, Andreas CJ, Vertzoni M, Dressman J, Reppas C. In-vitro simulation of luminal conditions for evaluation of performance of oral drug products: Choosing the appropriate test media. Eur J Pharm Biopharm. 2015 Jun;93:173-82. doi: 10.1016/j.ejpb.2015.03.009. Epub 2015 Mar 30. PMID: 25836053.](https://pubmed.ncbi.nlm.nih.gov/25836053/)
