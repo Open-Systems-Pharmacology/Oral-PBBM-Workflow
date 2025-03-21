@@ -75,8 +75,6 @@ Relevant parameters of the compound and formulation as well as the dissolution e
     | FaSSIF-V1 | Sodium taurocholate/lecithin        | 4:1 | 1.4 | Xie et al. [[8](#References)] |
     | FaSSIF-V1 | Sodium taurocholate/lecithin        | 4:1 | 3.0 | Lehto et al. [[9](#References)] |
 
-    <sup>a</sup> Corresponds to FaSSIF-V1.
-  
 
 * `BS_Concentration`: Molar concentration of bile salts or surfactants present in the dissolution medium. Table 1 above lists molar concentrations of bile salts in commonly used biorelevant media.
 * `BS_Lok K_neutral`: Logarithm of the water-to-micelle partition coefficient for the unionized drug species. This parameter can be fitted using the OSP Solubility Toolbox and should be updated with the fitted value.
