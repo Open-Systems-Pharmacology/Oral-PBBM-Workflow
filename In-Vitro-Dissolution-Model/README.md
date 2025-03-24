@@ -23,7 +23,10 @@ Relevant parameters of the compound and formulation as well as the dissolution e
 * `Dose`: Mass of the drug used in the dissolution experiment.
 * `Molecular weight`: Molar mass of the drug.
 * `PrecipitatedDrugSoluble`: Boolean variable that indicates whether the precipitated drug can (re)dissolve (set value to `1`) or not (set value to `0`).
-* `Thickness (unstirred water layer)`: Thickness of the unstirred water layer surrounding a drug particle. This parameter my not be applicable depending on the dissolution model used. **Further details needed:**
+* `Thickness (unstirred water layer)`: Thickness of the unstirred water layer surrounding a drug particle, also referred to as diffusional boundary layer adjacent to the dissolving surface. The most simple assumption is that the thickness of this unstirred water layer for an unbound drug is a constant value of 30 µm. However, more sophisticated and mechanistic models describe this thickness as a variable that primarily depends on two factors: the size of the dissolving drug particles and the agitation rate of the surrounding solution. The following models are implemented to describe this parameter:
+    * Hydrodynamic model: This is the most mechanistic model. It is based on the model presented by Pepin et al. [ref] and is used if the variable `UseHydrodynamicModel` is set to `1`. 
+  **Further details needed:**
+    UseHydrodynamicModel = 1 ? 2*r/Sh : (UseHintzJohnson = 1 ? min(r ; h_limit) : h_limit)
     UseHydrodynamicModel = 1 --> h_u = 2 * r/Sh
     UseHydrodynamicModel = 0 --> UseHintzJohnson?
                                  UseHintzJohnson = 1 --> h_u = min(r_current; h_limit)
@@ -31,7 +34,7 @@ Relevant parameters of the compound and formulation as well as the dissolution e
     h_limit = Thickness (unstirred water layer)
 * `NBins`: Number of particle size bins utilized in the dissolution model, with a maximum allowed value of 10.
 * `r_mean` and `r_gsd`: If particle sizes are assumed to be log-normally distributed, `r_mean` represents the geometric mean of the particle sizes, and `r_gsd` denotes the geometric standard deviation. These values are not used if the particle sizes for each bin are manually specified or fitted during parameter optimization.
-* `unitC_1µm`: This parameters is used in the calculation of different parameters related to the fluid velocity (such as the Reynolds number, micro-eddie velocity, and terminal velocity) according to the equations presented by Sugano et al.**The final dissolution model does not use the Sugano equations; hence, this parameter is not needed and can be deleted from the model file (?)**
+* `unitC_1µm`: This parameters is used in the calculation of different parameters related to the fluid velocity (such as the Reynolds number, micro-eddie velocity, and terminal velocity) according to the equations presented by Sugano et al. **[add reference]. The final dissolution model does not use the Sugano equations; hence, this parameter is not needed and can be deleted from the model file (?)**
 * `precipitationrate`: Precipitation rate of the drug, applicable only if `PrecipitatedDrugSoluble` is set to `0`.
 * `pH`: pH of the of dissolution medium. Table 1 lists pH of commonly used biorelevant media.
   
