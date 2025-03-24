@@ -74,20 +74,22 @@ Relevant parameters of the compound and formulation as well as the dissolution e
 * `BS_Concentration`: Molar concentration of bile salts or surfactants present in the dissolution medium. Table 1 above lists molar concentrations of bile salts in commonly used biorelevant media.
 * `BS_Lok K_neutral`: Logarithm of the water-to-micelle partition coefficient for the unionized drug species. This parameter can be fitted using the OSP Solubility Toolbox and should be updated with the fitted value.
 * `Disintegration Lambda`: Variable used in the Weibull function to reduce the initial number of particles, applicable only if `enableTabletDisintegration` is set to `1`.
-* `enableTabletDisintegration`: Boolean variable that indicates whether tablet disintegration is active (set value to `1`) or inactive (set value to `0`). If set to `1`, drug dissolution is initially slowed down by multiplying the number of particles in the dissolution equation with a time-dependent factor that increases from 0 to 1 according to a Weibull function according to the following function:
+* `enableTabletDisintegration`: Boolean variable that indicates whether tablet disintegration is active (set value to `1`) or inactive (set value to `0`). If set to `1`, drug dissolution is initially slowed down by expressing the number of particles ($N$) as follows:
 
-    ![image](https://github.com/user-attachments/assets/340cd142-8827-4dd1-b300-2b6ffa49ea99)
-   ***embedd equation***
+    $N = (1-\exp(-\lambda \frac{t^\alpha}{SA})) (N_\text{max} -1) +1$
 
+  In this equation, $\alpha$ stands for `Disintegration Alpha`, $\lambda$ stands for `Disintegration Lambda`, $t$ represents time, $SA$ the surface area of the tablet, and $N_\text{max}$ the maximum number of particles.
 * `Disintegration Alpha`: Variable used in the Weibull function to reduce the initial number of particles, applicable only if `enableTabletDisintegration` is set to `1`.
 * `BS_Lok K_ionized`: Logarithm of the water-to-micelle partition coefficient for the ionized drug species. This parameter can be fitted using the OSP Solubility Toolbox and should be updated with the fitted value.
 * `BS_C H2O`: Molar concentration of water. This parameter is temperature-dependent and might need to be adjusted for temperatures other than 37°C. It is used in the calculation of the biorelevant solubility of the drug. 
 * `H_Radius paddle max (H)`, `H_radius paddle min (I)`, `H_Radius vessel (R)`, `H_Distance between paddle and vessel bottom`, `H_Height of the paddle (B)`, `H_Shaft diameter (Q)`, and `H_T`: These parameters correspond to various geometrical measurements of the dissolution apparatus and vessel. They are pre-defined for the USP-2 dissolution apparatus but may require adjustments for use with other dissolution apparatuses.
 * `H_RPM`: Revolutions per minute indicating how quickly the stirrer of the dissolution apparatus is rotating, which affects the hydrodynamics of the dissolution medium and the rate at which the drug dissolves.
 * `H_Temperature`: Used to calculate the density of water. ***Only used for Sugano implementation or also for Pepin model?***
-* `Micellar diffusion coefficient`: Diffusion coefficient of micelles. The diffusion coefficient of drug bound to micelles ($D_b$) is assumed to be equal to the micellar diffusion coefficient. Table 3 and 4 list micellar diffusion coefficients for different micelle types calculated from the reported micelle size and the dynamic viscosity of water at 37°C (6.847 * 10<sup>-4</sup> Pa·s) using the Stokes-Einstein-Sutherland equation. 
+* `Micellar diffusion coefficient`: Diffusion coefficient of micelles. Generally, the diffusion coefficient of drug bound to micelles ($D_b$) is assumed to be equal to the micellar diffusion coefficient ($D_{mic}$), unless the **Effective Diffusion Model** is activated (see `UseEffectiveDiffusion`), in which case the effective diffusion coefficient ($D_{eff}$) is utilized instead of $D_{mic}$.
+  
+  Table 3 and 4 list values for $D_{mic}$ of different micelles that were calculated from the reported micelle size and the dynamic viscosity of water at 37°C (6.847 * 10<sup>-4</sup> Pa·s) using the Stokes-Einstein-Sutherland equation. 
 
-    **Table 3: Diffusion coefficient of bile salt/lecithin micelles in biorelevant media calculated using the Stokes-Einstein-Sutherland equation**
+    **Table 3: Diffusion coefficients of bile salt/lecithin micelles in biorelevant media calculated using the Stokes-Einstein-Sutherland equation**
     | Medium    | Temperature [°C] | Micelle type    | Bile Salt Concentration [mM] | Lecithin Concentration [mM] | Micelle diameter [nm] (Source)            | Calculated micellar diffusion coefficient [cm²/s] |
     | --------- | ---------------- | --------------- | ---------------------------- | --------------------------- | ----------------------------------------- | ------------------------------------------------- |
     | FaSSIF-V1 | 37 | Taurocholic acid/egg lecithin | 3.0                          | 0.75                        | 54.4 (Okazaki et al. [[4](#References)])  | 1.220 * 10<sup>-7</sup> |
@@ -101,18 +103,30 @@ Relevant parameters of the compound and formulation as well as the dissolution e
     **Table 4: Diffusion coefficients of sodium dodecyl sulfate (SDS) micelles in aqueous medium calculated using the Stokes-Einstein-Sutherland equation**
     | SDS Concentration [%] | Micelle radius [nm] (Source) | Calculated micellar diffusion coefficient [cm²/s] |
     | --------------------- | ---------------------------- | ------------------------------------------------- |
-    | 0.2%            | 1.26 (Hammouda 2013) | 2.633 * 10<sup>-6</sup> |
-    | 0.5%            | 1.26 (Clifford and Pethica 1966 + Hammouda 2013]) | 1.813 * 10<sup>-6</sup> |
-    | *not reported*  | 1.5 (Duplatre 1996) | 2.212 * 10<sup>-6</sup> |
+    | 0.2%            | 1.26 (Hammouda 2013)***add reference*** | 2.633 * 10<sup>-6</sup> |
+    | 0.5%            | 1.26 (Clifford and Pethica 1966 + Hammouda 2013])***add reference*** | 1.813 * 10<sup>-6</sup> |
+    | *not reported*  | 1.5 (Duplatre 1996)***add reference*** | 2.212 * 10<sup>-6</sup> |
 
 * `H_Volume border`: ***add description***
 * `H_Power per mass correction factor`: ***add description***
 * `H_Gravitational acceleration`: ***add description***
 * `H_gCor`: ***add description***
 * `H_K limit value`: ***add description***
-* `UseEffectiveDiffusion`, `UseEffectiveDiffusion` and `UseHintzJohnson`: Boolean variables that indicate how the thickness of the unstirred water layer surrounding particles of free drug ($h_u$) and drug bound to micelles ($h_b$) are calculated. Generally, the thickness of the unstirred water layer primarily depends on two factors: the size of the dissolving drug particles and the agitation rate of the surrounding solution. The following models are implemented to describe $h_u$ and $h_b$:
+* `UseEffectiveDiffusion`: Boolean variable that indicates how the thickness of the unstirred water layer surrounding particles of bound drug ($h_b$) is calculated. $h_b$ is calculated from the thickness of the unstirred water layer surrounding free drug particles ($h_u$) and the diffusion layer thickness ratio ($h_r$) as follows:
 
-  ***add descriptions for $h_b$***
+  $h_b = h_u \cdot h_r$
+
+  If `UseEffectiveDiffusion` is set to `0`, $h_r$ is expressed as the cube root of the ratio between micellar diffusion coefficient ($D_{mic}$) and aqueous diffusion coefficient ($D_{aq}$ or $D_u$): $\sqrt[3]{\frac{D_{mic}}{D_{aq}}}$. 
+
+  If `UseEffectiveDiffusion` is set to `1`, $h_r$ is 1 and $h_b$ equals $h_u$. Additionally, the diffusion coefficients of both free and bound drug ($D_u$ and $D_b$) are combined into the effective diffusion coefficient ($D_{eff}$) which is calculated as follows:
+
+  $D_{eff} = \frac{S_{aq}}{S_{br}} \cdot D_u + D_{mic} (1-\frac{S_{aq}}{S_{br}})$
+
+  Here, $D_u$ represents the diffusion coefficient of the unbound drug (equivalent to the aqueous diffusion coefficient, $D_{aq}$), $D_{mic}$ the micellar diffusion coefficient, $S_{aq}$ the aqueous solubility, and $S_{br}$ the biorelevant solubility.
+
+  Therefore, if `UseEffectiveDiffusion` is set to `1`, bound and unbound drug species are treated as equivalent species, resulting in $h_b$ = $h_u$ and $D_u = D_{mic} = D_{eff}$. This model should be used cautiously when extrapolating to other experimental conditions.
+
+* `UseEffectiveDiffusion` and `UseHintzJohnson`: Boolean variables that indicate how the thickness of the unstirred water layer surrounding particles of free drug ($h_u$) is calculated. Generally, the thickness of the unstirred water layer primarily depends on two factors: the size of the dissolving drug particles and the agitation rate of the surrounding solution. The following models are implemented to describe $h_u$:
   
     * **Hydrodynamic model**: Among the various models implemented, the hydrodynamic model is the most mechanistic approach. It based on the framework presented by Pepin et al. [[10](#References)] and calculates the thickness of the unstirred water for unbound drug ($h_u$) from the current particle radius ($r$) and the Sherwood number ($Sh$):
       
@@ -124,11 +138,11 @@ Relevant parameters of the compound and formulation as well as the dissolution e
 
     * **Hintz-Johnson model**: A simplified model proposed by Hintz and Johnson [[11](#References)] which assumes that $h_u$ is equal to the particle radius for particles with a radius smaller than the specified value for `Thickness (unstirred water layer)`. For larger particles that exceed this value, $h_u$ is assumed to be equal to `Thickness (unstirred water layer)`. This assumption has been validated for small particles (<20 to 100 μm) in a USP II paddle device at a paddle speed of 100 rpm (Sheng et al. [[12](#References)]). However, at a lower speed of 50 rpm, $h_u$ approximates $\sqrt{r}$ (Sheng et al. [[12](#References)], Niebergall et al. [[13](#References)]).
       
-      Therefore, this model does not explicitly account for the agitation rate of the medium and should be applied with caution when extrapolating to other experimental conditions. It is utilized if the variable `UseHydrodynamicModel` is set to `0` and the variable `UseHintzJohnson`is set to `1`. 
+      Therefore, this model does not explicitly account for the agitation rate of the medium and should be used cautiously when extrapolating to other experimental conditions. It is utilized if the variable `UseHydrodynamicModel` is set to `0` and the variable `UseHintzJohnson`is set to `1`. 
  
     * **Orginal Particle Dissolution Model**: This model is the simplest approach and is based on the framework proposed by Willmann et al. [[14](#References)]. It assumes that $h_u$ is constant and equal to the value specified for `Thickness (unstirred water layer)`. In the model presented by Willmann et al. [[14](#References)], a value of 30 µm is used for the `Thickness (unstirred water layer)`.
       
-      Therefore, this model should be applied with caution when extrapolating to other experimental conditions. It is utilized if the variable `UseHydrodynamicModel` is set to `0` and the variable `UseHintzJohnson`is set to `0`. 
+      Therefore, this model should be used cautiously when extrapolating to other experimental conditions. It is utilized if the variable `UseHydrodynamicModel` is set to `0` and the variable `UseHintzJohnson`is set to `0`. 
 
 
 
