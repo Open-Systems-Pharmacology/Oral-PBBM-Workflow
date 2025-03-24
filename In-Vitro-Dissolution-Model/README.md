@@ -52,23 +52,23 @@ Relevant parameters of the compound and formulation as well as the dissolution e
 * `BS_Critical Micellar Concentration`: Molar concentration of bile salts or surfactants in a solution at which micelles start to form. Below this concentration, bile salts or surfactants primarily exist as individual molecules dispersed in the solution and no micelles are formed. Table 2 lists critical micellar concentrations for various surfactants reported in the literature.
   
     **Table 2: Critical micelle concentrations in aqueous solutions reported for several surfactants**
-    | Medium | Surfactant(s)                | Surfactant Concentration or Ratio  | Critical Micellar Concentration [mM]  | Source |
-    | ------ | ---------------------------- | ---------------------------------- | ------------------------------------- | -------------- |
-    | Aqueous solution | Sodium dodecyl sulfate (SDS) | na                       | 8.0 | Hammouda, B. [[2](#References)] |
-    | Aqueous solution | SDS                          | 0.02%                    | 0.07 | Lehto et al. [[9](#References)] |
-    | Aqueous solution | SDS                          | 0.1%                     | 3.5 | Lehto et al. [[9](#References)] |
-    | Aqueous solution | SDS                          | 0.2%                     | 6.9 | Lehto et al. [[9](#References)] |
-    | Aqueous solution | Tween 80                     | 0.014%                   | 0.11 | Lehto et al. [[9](#References)] |
-    | Aqueous solution | Tween 80                     | 0.035%                   | 0.27 | Lehto et al. [[9](#References)] |
-    | Aqueous solution | Tween 80                     | 0.07%                    | 0.53 | Lehto et al. [[9](#References)] |
-    | Aqueous solution | Sodium taurocholate          | na                       | 6.0 | Gomez et al. [[7](#References)] |
-    | Aqueous solution | Sodium taurocholate          | na                       | 0.4 | Lehto et al. [[9](#References)] |
-    | Aqueous solution | Sodium taurocholate/phosphatidylcholine  | 4:1 | 0.6 | Gomez et al. [[7](#References)] |
-    | FaSSIF-V1 | Sodium taurocholate/lecithin (20°C) | 4:1 | 4.9 | Gomez et al. [[7](#References)] |
-    | FaSSIF-V1 | Sodium taurocholate/lecithin (25°C) | 4:1 | 4.7 | Gomez et al. [[7](#References)] |
-    | FaSSIF-V1 | Sodium taurocholate/lecithin (35°C) | 4:1 | 4.2 | Gomez et al. [[7](#References)] |
-    | FaSSIF-V1 | Sodium taurocholate/lecithin        | 4:1 | 1.4 | Xie et al. [[8](#References)] |
-    | FaSSIF-V1 | Sodium taurocholate/lecithin        | 4:1 | 3.0 | Lehto et al. [[9](#References)] |
+    | Medium | Surfactant(s) (Ratio)        | Critical Micellar Concentration [mM] (Temperature)  | Source |
+    | ------ | ---------------------------- | --------------------------------------------------- | ------ |
+    | Aqueous solution | Sodium dodecyl sulfate (SDS) | 8.0 | Hammouda, B. [[2](#References)] |
+    | SDS 0.02% aqueous solution | SDS                | 0.07 | Lehto et al. [[9](#References)] |
+    | SDS 0.1% aqueous solution | SDS                 | 3.5 | Lehto et al. [[9](#References)] |
+    | SDS 0.2% aqueous solution | SDS                 | 6.9 | Lehto et al. [[9](#References)] |
+    | Tween 80, 0.014% aqueous solution | Tween 80    | 0.11 | Lehto et al. [[9](#References)] |
+    | Tween 80, 0.035% aqueous  solution | Tween 80   | 0.27 | Lehto et al. [[9](#References)] |
+    | Tween 80, 0.07% aqueous  solution | Tween 80    | 0.53 | Lehto et al. [[9](#References)] |
+    | Aqueous solution | Sodium taurocholate          | 6.0 | Gomez et al. [[7](#References)] |
+    | Aqueous solution | Sodium taurocholate          | 0.4 | Lehto et al. [[9](#References)] |
+    | Aqueous solution | Sodium taurocholate/phosphatidylcholine (4:1) | 0.6 | Gomez et al. [[7](#References)] |
+    | FaSSIF-V1 | Sodium taurocholate/lecithin (4:1)  | 4.9 (20°C) | Gomez et al. [[7](#References)] |
+    | FaSSIF-V1 | Sodium taurocholate/lecithin (4:1)  | 4.7 (25°C) | Gomez et al. [[7](#References)] |
+    | FaSSIF-V1 | Sodium taurocholate/lecithin (4:1)  | 4.2 (35°C) | Gomez et al. [[7](#References)] |
+    | FaSSIF-V1 | Sodium taurocholate/lecithin (4:1)  | 1.4 | Xie et al. [[8](#References)] |
+    | FaSSIF-V1 | Sodium taurocholate/lecithin (4:1)  | 3.0 | Lehto et al. [[9](#References)] |
 
 
 * `BS_Concentration`: Molar concentration of bile salts or surfactants present in the dissolution medium. Table 1 above lists molar concentrations of bile salts in commonly used biorelevant media.
