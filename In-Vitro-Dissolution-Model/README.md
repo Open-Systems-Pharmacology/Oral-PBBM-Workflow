@@ -124,11 +124,11 @@ Relevant parameters of the compound and formulation as well as the dissolution e
 
     * **Hintz-Johnson model**: A simplified model proposed by Hintz and Johnson [[11](#References)] which assumes that $h_u$ is equal to the particle radius for particles with a radius smaller than the specified value for `Thickness (unstirred water layer)`. For larger particles that exceed this value, $h_u$ is assumed to be equal to `Thickness (unstirred water layer)`. This assumption has been validated for small particles (<20 to 100 μm) in a USP II paddle device at a paddle speed of 100 rpm (Sheng et al. [[12](#References)]). However, at a lower speed of 50 rpm, $h_u$ approximates $\sqrt{r}$ (Sheng et al. [[12](#References)], Niebergall et al. [[13](#References)]).
       
-      Therefore, this model does not explicitly account for the agitation rate of the medium and should be applied with caution when extrapolating to other experimental conditions. It is utilized if the variable `UseHydrodynamicModel` is set to `0 ` and the variable `UseHintzJohnson`is set to `1`. 
+      Therefore, this model does not explicitly account for the agitation rate of the medium and should be applied with caution when extrapolating to other experimental conditions. It is utilized if the variable `UseHydrodynamicModel` is set to `0` and the variable `UseHintzJohnson`is set to `1`. 
  
     * **Orginal Particle Dissolution Model**: This model is the simplest approach and is based on the framework proposed by Willmann et al. [[14](#References)]. It assumes that $h_u$ is constant and equal to the value specified for `Thickness (unstirred water layer)`. In the model presented by Willmann et al. [[14](#References)], a value of 30 µm is used for the `Thickness (unstirred water layer)`.
       
-      Therefore, this model should be applied with caution when extrapolating to other experimental conditions. It is utilized if the variable `UseHydrodynamicModel` is set to `0 ` and the variable `UseHintzJohnson`is set to `0`. 
+      Therefore, this model should be applied with caution when extrapolating to other experimental conditions. It is utilized if the variable `UseHydrodynamicModel` is set to `0` and the variable `UseHintzJohnson`is set to `0`. 
 
 
 
