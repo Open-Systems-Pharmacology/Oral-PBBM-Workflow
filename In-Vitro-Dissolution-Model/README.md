@@ -23,18 +23,10 @@ Relevant parameters of the compound and formulation as well as the dissolution e
 * `Dose`: Mass of the drug used in the dissolution experiment.
 * `Molecular weight`: Molar mass of the drug.
 * `PrecipitatedDrugSoluble`: Boolean variable that indicates whether the precipitated drug can (re)dissolve (set value to `1`) or not (set value to `0`).
-* `Thickness (unstirred water layer)`: Thickness of the unstirred water layer surrounding a drug particle, also referred to as diffusional boundary layer adjacent to the dissolving surface. The most simple assumption is that the thickness of this unstirred water layer for an unbound drug is a constant value of 30 µm. However, more sophisticated and mechanistic models describe this thickness as a variable that primarily depends on two factors: the size of the dissolving drug particles and the agitation rate of the surrounding solution. The following models are implemented to describe this parameter:
-    * Hydrodynamic model: This is the most mechanistic model. It is based on the model presented by Pepin et al. [ref] and is used if the variable `UseHydrodynamicModel` is set to `1`. 
-  **Further details needed:**
-    UseHydrodynamicModel = 1 ? 2*r/Sh : (UseHintzJohnson = 1 ? min(r ; h_limit) : h_limit)
-    UseHydrodynamicModel = 1 --> h_u = 2 * r/Sh
-    UseHydrodynamicModel = 0 --> UseHintzJohnson?
-                                 UseHintzJohnson = 1 --> h_u = min(r_current; h_limit)
-                                 UseHintzJohnson = 0 --> h_u = h_limit
-    h_limit = Thickness (unstirred water layer)
+* `Thickness (unstirred water layer)`: Thickness of the unstirred water layer surrounding a drug particle, also referred to as diffusional boundary layer adjacent to the dissolving surface. This parameter is only used when the parameter `UseHydrodynamicModel` is set to `0` (see below for further explanations).
 * `NBins`: Number of particle size bins utilized in the dissolution model, with a maximum allowed value of 10.
 * `r_mean` and `r_gsd`: If particle sizes are assumed to be log-normally distributed, `r_mean` represents the geometric mean of the particle sizes, and `r_gsd` denotes the geometric standard deviation. These values are not used if the particle sizes for each bin are manually specified or fitted during parameter optimization.
-* `unitC_1µm`: This parameters is used in the calculation of different parameters related to the fluid velocity (such as the Reynolds number, micro-eddie velocity, and terminal velocity) according to the equations presented by Sugano et al. **[add reference]. The final dissolution model does not use the Sugano equations; hence, this parameter is not needed and can be deleted from the model file (?)**
+* `unitC_1µm`: This parameters is used in the calculation of different parameters related to the fluid velocity (such as the Reynolds number, micro-eddie velocity, and terminal velocity) according to the equations presented by Sugano et al. ***[add reference]. The final dissolution model does not use the Sugano equations; hence, this parameter is not needed and can be deleted from the model file (?)***
 * `precipitationrate`: Precipitation rate of the drug, applicable only if `PrecipitatedDrugSoluble` is set to `0`.
 * `pH`: pH of the of dissolution medium. Table 1 lists pH of commonly used biorelevant media.
   
@@ -85,14 +77,15 @@ Relevant parameters of the compound and formulation as well as the dissolution e
 * `enableTabletDisintegration`: Boolean variable that indicates whether tablet disintegration is active (set value to `1`) or inactive (set value to `0`). If set to `1`, drug dissolution is initially slowed down by multiplying the number of particles in the dissolution equation with a time-dependent factor that increases from 0 to 1 according to a Weibull function according to the following function:
 
     ![image](https://github.com/user-attachments/assets/340cd142-8827-4dd1-b300-2b6ffa49ea99)
+   ***embedd equation***
 
 * `Disintegration Alpha`: Variable used in the Weibull function to reduce the initial number of particles, applicable only if `enableTabletDisintegration` is set to `1`.
 * `BS_Lok K_ionized`: Logarithm of the water-to-micelle partition coefficient for the ionized drug species. This parameter can be fitted using the OSP Solubility Toolbox and should be updated with the fitted value.
 * `BS_C H2O`: Molar concentration of water. This parameter is temperature-dependent and might need to be adjusted for temperatures other than 37°C. It is used in the calculation of the biorelevant solubility of the drug. 
 * `H_Radius paddle max (H)`, `H_radius paddle min (I)`, `H_Radius vessel (R)`, `H_Distance between paddle and vessel bottom`, `H_Height of the paddle (B)`, `H_Shaft diameter (Q)`, and `H_T`: These parameters correspond to various geometrical measurements of the dissolution apparatus and vessel. They are pre-defined for the USP-2 dissolution apparatus but may require adjustments for use with other dissolution apparatuses.
 * `H_RPM`: Revolutions per minute indicating how quickly the stirrer of the dissolution apparatus is rotating, which affects the hydrodynamics of the dissolution medium and the rate at which the drug dissolves.
-* `H_Temperature`: Used to calculate the density of water. **Only used for Sugano implementation or also for Pepin model?**
-* `Micellar diffusion coefficient`: Diffusion coefficient of micelles. The diffusion coefficient of drug bound to micelles (D<sub>b</sub>) is assumed to be equal to the micellar diffusion coefficient. Table 3 and 4 list micellar diffusion coefficients for different micelle types calculated from the reported micelle size and the dynamic viscosity of water at 37°C (6.847 * 10<sup>-4</sup> Pa·s) using the Stokes-Einstein-Sutherland equation. 
+* `H_Temperature`: Used to calculate the density of water. ***Only used for Sugano implementation or also for Pepin model?***
+* `Micellar diffusion coefficient`: Diffusion coefficient of micelles. The diffusion coefficient of drug bound to micelles ($D_b$) is assumed to be equal to the micellar diffusion coefficient. Table 3 and 4 list micellar diffusion coefficients for different micelle types calculated from the reported micelle size and the dynamic viscosity of water at 37°C (6.847 * 10<sup>-4</sup> Pa·s) using the Stokes-Einstein-Sutherland equation. 
 
     **Table 3: Diffusion coefficient of bile salt/lecithin micelles in biorelevant media calculated using the Stokes-Einstein-Sutherland equation**
     | Medium    | Temperature [°C] | Micelle type    | Bile Salt Concentration [mM] | Lecithin Concentration [mM] | Micelle diameter [nm] (Source)            | Calculated micellar diffusion coefficient [cm²/s] |
@@ -111,6 +104,32 @@ Relevant parameters of the compound and formulation as well as the dissolution e
     | 0.2%            | 1.26 (Hammouda 2013) | 2.633 * 10<sup>-6</sup> |
     | 0.5%            | 1.26 (Clifford and Pethica 1966 + Hammouda 2013]) | 1.813 * 10<sup>-6</sup> |
     | *not reported*  | 1.5 (Duplatre 1996) | 2.212 * 10<sup>-6</sup> |
+
+* `H_Volume border`: ***add description***
+* `H_Power per mass correction factor`: ***add description***
+* `H_Gravitational acceleration`: ***add description***
+* `H_gCor`: ***add description***
+* `H_K limit value`: ***add description***
+* `UseEffectiveDiffusion`, `UseEffectiveDiffusion` and `UseHintzJohnson`: Boolean variables that indicate how the thickness of the unstirred water layer surrounding particles of free drug ($h_u$) and drug bound to micelles ($h_b$) are calculated. Generally, the thickness of the unstirred water layer primarily depends on two factors: the size of the dissolving drug particles and the agitation rate of the surrounding solution. The following models are implemented to describe $h_u$ and $h_b$:
+
+  ***add descriptions for $h_b$***
+  
+    * **Hydrodynamic model**: Among the various models implemented, the hydrodynamic model is the most mechanistic approach. It based on the framework presented by Pepin et al. [[10](#References)] and calculates the thickness of the unstirred water for unbound drug ($h_u$) from the current particle radius ($r$) and the Sherwood number ($Sh$):
+      
+      $h_u = \frac{2r}{Sh}$
+
+      The Sherwood number characterizes the mass transfer of dissolved drug molecules from the surface of particles into the surrounding fluid and is influenced by various key parameters related to the system, such as agitation rate and viscosity, as well as the dissolution process, including particle size and diffusion characteristics. A higher Sherwood number indicates that convective mass transfer plays a significant role compared to diffusion, thereby enhancing the dissolution rate of the drug particles. In contrast, a lower Sherwood number suggests that diffusion is the limiting factor in the dissolution process. For detailed information on its calculation, please refer to the article by Pepin et al. [[10](#References)].
+
+      This model is used if the variable `UseHydrodynamicModel` is set to `1`. 
+
+    * **Hintz-Johnson model**: A simplified model proposed by Hintz and Johnson [[11](#References)] which assumes that $h_u$ is equal to the particle radius for particles with a radius smaller than the specified value for `Thickness (unstirred water layer)`. For larger particles that exceed this value, $h_u$ is assumed to be equal to `Thickness (unstirred water layer)`. This assumption has been validated for small particles (<20 to 100 μm) in a USP II paddle device at a paddle speed of 100 rpm (Sheng et al. [[12](#References)]). However, at a lower speed of 50 rpm, $h_u$ approximates $\sqrt{r}$ (Sheng et al. [[12](#References)], Niebergall et al. [[13](#References)]).
+      
+      Therefore, this model does not explicitly account for the agitation rate of the medium and should be applied with caution when extrapolating to other experimental conditions. It is utilized if the variable `UseHydrodynamicModel` is set to `0 ` and the variable `UseHintzJohnson`is set to `1`. 
+ 
+    * **Orginal Particle Dissolution Model**: This model is the simplest approach and is based on the framework proposed by Willmann et al. [[14](#References)]. It assumes that $h_u$ is constant and equal to the value specified for `Thickness (unstirred water layer)`. In the model presented by Willmann et al. [[14](#References)], a value of 30 µm is used for the `Thickness (unstirred water layer)`.
+      
+      Therefore, this model should be applied with caution when extrapolating to other experimental conditions. It is utilized if the variable `UseHydrodynamicModel` is set to `0 ` and the variable `UseHintzJohnson`is set to `0`. 
+
 
 
 ## Code of conduct
@@ -141,5 +160,12 @@ The framework is distributed under the [GPLv2 License](https://github.com/Open-S
 
 [9] [Lehto P, Kortejärvi H, Liimatainen A, Ojala K, Kangas H, Hirvonen J, Tanninen VP, Peltonen L. Use of conventional surfactant media as surrogates for FaSSIF in simulating in vivo dissolution of BCS class II drugs. Eur J Pharm Biopharm. 2011 Aug;78(3):531-8. doi: 10.1016/j.ejpb.2011.02.007. Epub 2011 Feb 15. PMID: 21329757.](https://pubmed.ncbi.nlm.nih.gov/21329757/)
 
+[10] [Pepin X, Goetschy M, Abrahmsén-Alami S. Mechanistic Models for USP2 Dissolution Apparatus, Including Fluid Hydrodynamics and Sedimentation. J Pharm Sci. 2022 Jan;111(1):185-196. doi: 10.1016/j.xphs.2021.10.006. Epub 2021 Oct 16. PMID: 34666045.](https://pubmed.ncbi.nlm.nih.gov/34666045/)
 
+[11] [Hintz, R. J., & Johnson, K. C. (1989). The effect of particle size distribution on dissolution rate and oral absorption. International Journal of Pharmaceutics, 51(1), 9-17.](https://www.sciencedirect.com/science/article/pii/0378517389900690)
 
+[12] [Sheng JJ, Sirois PJ, Dressman JB, Amidon GL. Particle diffusional layer thickness in a USP dissolution apparatus II: a combined function of particle size and paddle speed. J Pharm Sci. 2008 Nov;97(11):4815-29. doi: 10.1002/jps.21345. PMID: 18314890.](https://pubmed.ncbi.nlm.nih.gov/18314890/)
+
+[13] [Niebergall PJ, Milosovich G, Goyan JE. Dissolution rate studies. II. Dissolution of particles under conditions of rapid agitation. J Pharm Sci. 1963 Mar;52:236-41. doi: 10.1002/jps.2600520310. PMID: 13938476.](https://pubmed.ncbi.nlm.nih.gov/13938476/)
+
+[14] [Willmann S, Thelen K, Becker C, Dressman JB, Lippert J. Mechanism-based prediction of particle size-dependent dissolution and absorption: cilostazol pharmacokinetics in dogs. Eur J Pharm Biopharm. 2010 Sep;76(1):83-94. doi: 10.1016/j.ejpb.2010.06.003. Epub 2010 Jun 8. PMID: 20554023.](https://pubmed.ncbi.nlm.nih.gov/20554023/)
