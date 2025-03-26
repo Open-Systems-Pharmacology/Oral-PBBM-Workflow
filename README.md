@@ -1,5 +1,5 @@
 # Oral-PBBM-workflow
-PBBM workflow for orally administered drug products published by Vrenken et al. [[1](#References)].
+Within this repository, we distribute the physiologically-based biopharmaceutics (PBBM) workflow for orally administered drug products that was previously published by Vrenken et al. [[1](#References)]. The workflow consists of three tools that build upon each other:
 
 ## Code of conduct
 Everyone interacting in the Open Systems Pharmacology community (codebases, issue trackers, chat rooms, mailing lists etc...) is expected to follow the Open Systems Pharmacology [code of conduct](https://github.com/Open-Systems-Pharmacology/Suite/blob/master/CODE_OF_CONDUCT.md#contributor-covenant-code-of-conduct).
