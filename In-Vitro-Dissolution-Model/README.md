@@ -5,18 +5,44 @@ It accounts for the influence of bile salt micelles on solubility, as well as th
 The model is built upon the [OSP Solubility Toolbox](https://github.com/AndreDlm/Oral-PBBM-Workflow/tree/main/OSP-Solubility-Toolbox), with several parameters in this dissolution model derived from the OSP Solubility Toolbox.
 
 ## Features
+- **Data Import**: Batch import of dissolution data from an Excel file.
+- **Parameter Fitting**: Fit dissolution-related parameters to observed dissolution data.
+- **Dissolution Module**: MoBi template file to model in vitro dissolution experiments.
+- **Dissolution Database Template**: An Excel template that can be populated with user-specific data for seamless integration.
 
 ## Prerequisites
 
 To use the OSP Solubility Toolbox, ensure you have the [OSP Software Suite](https://github.com/Open-Systems-Pharmacology/Suite/releases) installed (version 11.3 or higher).
 
+Update the OSP Suite dimension database in both your Mobi and PK-Sim installation folders (see below).
+
 ## Getting Started
 
-Download the MoBi template file distributed in this repository and open it with MoBi. 
+Download the `OSPSuite.Dimensions.xml` file and copy into both your Mobi and PK-Sim installation folders.
+
+### Importing observed in vitro dissolution data in MoBi (Optional)
+
+**Steps:**
+
+- Download the `In vitro db template.xlsx` file and fill `‘Studies’` tab with especially the in vitro set-up, compound and ID; `‘ReleaseProfiles’` Variability is optional, `‘Analyte’` at least name and MW; and `‘projects’` tab. *Be mindful of columns with formulas and make sure to keep them intact and extend them for new inputs, this helps ensuring the input integrity.*
+- Download the `InVitro-db-JSON-builder.R` script and the `JSONauxiliaryFunctionsInVitroDb.R` located in the Auxiliary functions folder. Run the `InVitro-db-JSON-builder.R` script after specifying the working directory and in vitro database location. *The initial plotting can be skipped.*
+- Open PK-Sim **in developer mode** and load the `TransferDummy.pksim5` file. Then load observed data .JSON file from the previous step. Run dummy simulation and drag all observed data of interest in to the simulation. Save simulation into .pkml file.
+
+This .pkml file can be loaded into you MoBi project file.
+
+Files can be loaded as building blocks in PK-Sim<sup>®</sup> when the application is started **in developer mode** via the Windows command prompt as follows (see also [here](https://github.com/Open-Systems-Pharmacology/Forum/issues/305) for an alternative way): 
+
+`cd C:\Program Files\Open Systems Pharmacology\PK-Sim [YOUR VERSION]`
+
+`PKSim /dev`
+
+### Preparing the dissolution module
+Download the MoBi template file distributed in this repository and open it with MoBi. *Optional: load your saved .pkml file with observed dissolution data by selecting the `Import/Export` tab and loading the saved simulation*
 
 ## Usage
 
-Relevant parameters of the compound and formulation as well as the dissolution experiment are defined in the **Parameter Start Values** Building Block. The `API Properties` Building Block in this section contains the following parameters that may need to be adjusted:
+### Setting up the simulations
+Relevant parameters of the compound and formulation as well as the dissolution experiment are defined in the **Parameter Start Values** Building Block. The `API Properties` Building Block in this section contains the following parameters that may need to be adjusted (*Tip: clone the*  **Parameter Start Values** *Building Block and change the parameters according to the API properties and set-up of the experiments to be modeled*):
 
 * `iBin`: Unique identifier for each particle size bin. This value should not be modified.
 * `Volume`: Volume of the dissolution medium which can be either 500 mL or 900 mL.
@@ -152,7 +178,33 @@ Relevant parameters of the compound and formulation as well as the dissolution e
       
       Therefore, this model should be used cautiously when extrapolating to other experimental conditions. It is utilized if the variable `UseHydrodynamicModel` is set to `0` and the variable `UseHintzJohnson`is set to `0`. 
 
+* `Surface integration factor`: Parameter that can be used to modify precipitation kinetics. Setting it to a very high value will prevent precipitation almost completely.
 
+When all parameter start values are cloned and populated with the correct parameter values, you can create the simulations for all the experiments that you want to model.
+
+### Adopting the Product-Particle Size Distribution (P-PSD) approach
+* Create a Parameter Identification with all experiments of interest in the ‘Data’ tab for a specific formulation/Batch.
+  * Set weight of all experiments to 0 except for one based on:
+    * Preferably medium does not contain surfactants.
+    * Maximize the datapoints on the dissolution slope, preferably as many points between 20-80% of the dose dissolved.
+  * In the ‘Parameters’ tab select the `r_mean` and `r_gsd` parameters – for log-normal distribution fitting, or `radius (at t=0)` and `rel_amountFactor` for all bins of the formulation.
+    * Log-normal distribution fitting: Fit, Monte – Carlo might be necessary for fitting.
+    * Separate bins: Fix `radius (at t=0)` for all bins and cover a wide range with the 10 particle bins and run the optimization.
+      * After this initial run you know roughly in which range you should specify your particle radius bins.
+      * For computational load reasons it is advisable to end up with the least amount of bins that are still able to capture the observed data in the different experiments. Do this by setting the `rel_amountFactor` of a bin to 0 and clicking the 'fix parameter box'.
+
+* In the ‘Configuration’ tab it is advisable to test optimization with both the Levenberg – Marquardt and  Monte – Carlo optimization algorithms with multiple runs.
+
+* In general there is some trial and error involved during this step of the PBBM development, try different experiments to optimize the P-PSD to if the initial one does not work. Also try many initial particle sizes and look at your resulting Time Profiles to give an indication whether the particle size of some bins should be increased (slow down dissolution) or decreased (increase dissolution rate) which will affect the different dissolution phases in you dissolution profiles.
+
+### Exporting P-PSD to PK-Sim
+* Follow step 3 from the [IVIVC workflow](https://github.com/Open-Systems-Pharmacology/IVIVC-with-particle-dissolution-module-in-OSP/tree/master) to create your formulation building block which you can use in PK-Sim. Download the input and output files included there as you will need some of them.
+  * Replace in `PSV_CompoundA_BatchX_lognormal.xlsx` (Output_files) the initial radii and rel_amounts to your fitted values and create the building blocks using the `JSON.R` script (Input_files).
+  * You might need to adjust `BB_Formulation_ParticleDissolution_10Bins_input.json` (Input_files) when you use less than 10 bins, alternatively you could set rel_amounts of the not used extra bins to 0 (*I have not tested this latter approach*)
+  * Run `JSON.R` conversion script
+
+* Load your PK-Sim project file in developer mode and load the JSON formulation Building Block from snapshot.
+  
 
 ## Code of conduct
 Everyone interacting in the Open Systems Pharmacology community (codebases, issue trackers, chat rooms, mailing lists etc...) is expected to follow the Open Systems Pharmacology [code of conduct](https://github.com/Open-Systems-Pharmacology/Suite/blob/master/CODE_OF_CONDUCT.md#contributor-covenant-code-of-conduct).
