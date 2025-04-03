@@ -14,30 +14,35 @@ The model is built upon the [OSP Solubility Toolbox](https://github.com/AndreDlm
 
 To use the OSP Solubility Toolbox, ensure you have the [OSP Software Suite](https://github.com/Open-Systems-Pharmacology/Suite/releases) installed (version 11.3 or higher).
 
-Update the OSP Suite dimension database in both your Mobi and PK-Sim installation folders (see below).
+**Note:** If you use OSP version <13, please update the OSP Suite dimension database in both your Mobi and PK-Sim installation folders as follows: 
+Download the file [`OSPSuite.Dimensions.xml`](https://github.com/Open-Systems-Pharmacology/Oral-PBBM-Workflow/blob/main/In-Vitro-Dissolution-Model/OSPSuite.Dimensions.xml) distributed in this repository and copy it into both your Mobi and PK-Sim installation folders (overwrite the existing file in each folder). 
 
 ## Getting Started
 
-Download the `OSPSuite.Dimensions.xml` file and copy into both your Mobi and PK-Sim installation folders.
-
 ### Importing observed in vitro dissolution data in MoBi (Optional)
 
-**Steps:**
+**Required steps:**
 
-- Download the `In vitro db template.xlsx` file and fill `‘Studies’` tab with especially the in vitro set-up, compound and ID; `‘ReleaseProfiles’` Variability is optional, `‘Analyte’` at least name and MW; and `‘projects’` tab. *Be mindful of columns with formulas and make sure to keep them intact and extend them for new inputs, this helps ensuring the input integrity.*
-- Download the `InVitro-db-JSON-builder.R` script and the `JSONauxiliaryFunctionsInVitroDb.R` located in the Auxiliary functions folder. Run the `InVitro-db-JSON-builder.R` script after specifying the working directory and in vitro database location. *The initial plotting can be skipped.*
+- Download the [`In vitro db template.xlsx`](https://github.com/Open-Systems-Pharmacology/Oral-PBBM-Workflow/blob/main/In-Vitro-Dissolution-Model/Input%20in%20vitro%20database/In%20vitro%20db%20template.xlsx) file and fill `‘Studies’` tab with especially the in vitro set-up, compound and ID; `‘ReleaseProfiles’` Variability is optional, `‘Analyte’` at least name and MW; and `‘projects’` tab. *Be mindful of columns with formulas and make sure to keep them intact and extend them for new inputs, this helps ensuring the input integrity.*
+- Download the [`InVitro-db-JSON-builder.R`](https://github.com/Open-Systems-Pharmacology/Oral-PBBM-Workflow/blob/main/In-Vitro-Dissolution-Model/InVitro-db-JSON-builder.R) script and the [`JSONauxiliaryFunctionsInVitroDb.R`](https://github.com/Open-Systems-Pharmacology/Oral-PBBM-Workflow/blob/main/In-Vitro-Dissolution-Model/Auxiliary%20functions/JSONauxiliaryFunctionsInVitroDb.R) located in the `Auxiliary functions` folder.
+- Run the `InVitro-db-JSON-builder.R` script after specifying the working directory and in vitro database location. *The initial plotting can be skipped.*
 - Open PK-Sim **in developer mode** and load the `TransferDummy.pksim5` file. Then load observed data .JSON file from the previous step. Run dummy simulation and drag all observed data of interest in to the simulation. Save simulation into .pkml file.
 
 This .pkml file can be loaded into you MoBi project file.
 
 Files can be loaded as building blocks in PK-Sim<sup>®</sup> when the application is started **in developer mode** via the Windows command prompt as follows (see also [here](https://github.com/Open-Systems-Pharmacology/Forum/issues/305) for an alternative way): 
 
-`cd C:\Program Files\Open Systems Pharmacology\PK-Sim [YOUR VERSION]`
+`cd C:\Program Files\Open Systems Pharmacology\PK-Sim [VERSION NUMBER]`
 
 `PKSim /dev`
 
-### Preparing the dissolution module
-Download the MoBi template file distributed in this repository and open it with MoBi. *Optional: load your saved .pkml file with observed dissolution data by selecting the `Import/Export` tab and loading the saved simulation*
+### Preparing the dissolution model
+
+**Required steps:**
+
+- Download the MoBi template file [`TemplatePBBM-Reduced.mbp3`](https://github.com/Open-Systems-Pharmacology/Oral-PBBM-Workflow/blob/main/In-Vitro-Dissolution-Model/TemplatePBBM-Reduced.mbp3) distributed in this repository and open it with MoBi. 
+- *Optional: load your saved .pkml file with observed dissolution data created in the previous step by selecting the `Import/Export` tab and loading the saved simulation*
+- Select the appropriate dissolution sub-model based on the available data. The following decision tree can assist in making this choice:
 
 ## Usage
 
