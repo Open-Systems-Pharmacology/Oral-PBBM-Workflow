@@ -40,7 +40,7 @@ Files can be loaded as building blocks in PK-Sim<sup>®</sup> when the applicati
 
 **Required steps:**
 
-- Download the MoBi template file [`TemplatePBBM-Reduced.mbp3`](https://github.com/Open-Systems-Pharmacology/Oral-PBBM-Workflow/blob/main/In-Vitro-Dissolution-Model/TemplatePBBM-Reduced.mbp3) distributed in this repository and open it with MoBi. 
+- Download the MoBi template file [`In-Vitro-Dissolution-Model_Template.mbp3`](https://github.com/Open-Systems-Pharmacology/Oral-PBBM-Workflow/blob/main/In-Vitro-Dissolution-Model/In-Vitro-Dissolution-Model_Template.mbp3) distributed in this repository and open it with MoBi. 
 - *Optional: load your saved .pkml file with observed dissolution data created in the previous step by selecting the `Import/Export` tab and loading the saved simulation*
 - Select the appropriate dissolution sub-model based on the available data. The following decision tree can assist in making this choice:
 
