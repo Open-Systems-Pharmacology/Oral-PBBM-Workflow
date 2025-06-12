@@ -17,6 +17,8 @@ The in vitro dissolution model has been presented previously by Vrenken et al. [
 
 ## PBPK Model Upgrade
 
+The PBPK model upgrade incorporating relevant changes required for this PBBM workflow will be made available after publication of the respective article by Vrenken et al. [[2](#References)].
+
 ## Code of conduct
 Everyone interacting in the Open Systems Pharmacology community (codebases, issue trackers, chat rooms, mailing lists etc...) is expected to follow the Open Systems Pharmacology [code of conduct](https://github.com/Open-Systems-Pharmacology/Suite/blob/master/CODE_OF_CONDUCT.md#contributor-covenant-code-of-conduct).
 
@@ -28,3 +30,4 @@ The framework is distributed under the [GPLv2 License](https://github.com/Open-S
 
 ## References
 [1] [Vrenken P, Vertzoni M, Frechen S, Solodenko J, Meyer M, Muenster U, Dallmann A. Development of a novel Physiologically Based Biopharmaceutics modeling (PBBM) framework using the Open Systems Pharmacology Suite, Part 1: in vitro modeling of Vericiguat. *Eur J Pharm Sci.* 2025.](https://www.sciencedirect.com/science/article/pii/S0928098725001630)
+[2] Vrenken P, Vertzoni M, Frechen S, Solodenko J, Meyer M, Muenster U, Dallmann A. Development of a novel Physiologically Based Biopharmaceutics modeling (PBBM) framework using the Open Systems Pharmacology Suite, Part 2: in vivo pharmacokinetic modeling of Vericiguat.
