@@ -12,7 +12,7 @@ The model is built upon the [OSP Solubility Toolbox](https://github.com/AndreDlm
 
 ## Prerequisites
 
-To use the OSP Solubility Toolbox, ensure you have the [OSP Software Suite](https://github.com/Open-Systems-Pharmacology/Suite/releases) installed (version 11.3 or higher).
+To use the in vitro dissolution model, ensure you have the [OSP Software Suite](https://github.com/Open-Systems-Pharmacology/Suite/releases) installed (version 11.3 or higher).
 
 **Note:** If you use OSP version <13, please update the OSP Suite dimension database in both your Mobi and PK-Sim installation folders as follows: 
 Download the file [`OSPSuite.Dimensions.xml`](https://github.com/Open-Systems-Pharmacology/Oral-PBBM-Workflow/blob/main/In-Vitro-Dissolution-Model/OSPSuite.Dimensions.xml) distributed in this repository and copy it into both your Mobi and PK-Sim installation folders (overwrite the existing file in each folder). 
