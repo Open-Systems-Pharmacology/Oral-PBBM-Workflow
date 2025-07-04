@@ -1,11 +1,14 @@
 # Oral-PBBM-workflow
-Within this repository, we distribute the physiologically-based biopharmaceutics (PBBM) workflow for orally administered drug products that was previously published by Vrenken et al. [[1](#References)]. The workflow consists of three tools that build upon each other:
+Within this repository, we distribute the physiologically-based biopharmaceutics (PBBM) workflow for orally administered drug products that was previously published by Vrenken et al. [[1](#References),[2](#References)]. The workflow consists of three tools that build upon each other:
 
 ![gim](https://github.com/Open-Systems-Pharmacology/Oral-PBBM-Workflow/blob/main/Figures/PBBM_workflow.png)
 
 The following decision tree assists in determining which features of the OSP Solubility Toolbox and the in vitro dissolution model are relevant based on the type of input provided.
 
 ![gim](https://github.com/Open-Systems-Pharmacology/Oral-PBBM-Workflow/blob/main/Figures/DecisionTree.png)
+
+Template files for each of these tools can be found in the respective sub-folders. These template files are ready to be used and need to be populated with own data. 
+The application of this workflow to vericiguat and the corresponding files can be found in the sub-folder Vericiguat.
 
 ## OSP Solubility Toolbox
 
@@ -29,6 +32,6 @@ We encourage contribution to the Open Systems Pharmacology community. Before get
 The framework is distributed under the [GPLv2 License](https://github.com/Open-Systems-Pharmacology/Suite/blob/develop/LICENSE).
 
 ## References
-[1] [Vrenken P, Vertzoni M, Frechen S, Solodenko J, Meyer M, Muenster U, Dallmann A. Development of a novel Physiologically Based Biopharmaceutics modeling (PBBM) framework using the Open Systems Pharmacology Suite, Part 1: in vitro modeling of Vericiguat. *Eur J Pharm Sci.* 2025.](https://www.sciencedirect.com/science/article/pii/S0928098725001630)
+[1] [Vrenken P, Vertzoni M, Frechen S, Solodenko J, Meyer M, Muenster U, Dallmann A. Development of a novel Physiologically Based Biopharmaceutics modeling (PBBM) framework using the Open Systems Pharmacology Suite, Part 1: in vitro modeling of Vericiguat. *Eur J Pharm Sci.* 2025 Jun 10;212:107164. doi: 10.1016/j.ejps.2025.107164. Epub ahead of print. PMID: 40505839](https://www.sciencedirect.com/science/article/pii/S0928098725001630)
 
-[2] Vrenken P, Vertzoni M, Frechen S, Solodenko J, Meyer M, Muenster U, Dallmann A. Development of a novel Physiologically Based Biopharmaceutics modeling (PBBM) framework using the Open Systems Pharmacology Suite, Part 2: in vivo pharmacokinetic modeling of Vericiguat.
+[2] [Vrenken P, Vertzoni M, Frechen S, Solodenko J, Meyer M, Muenster U, Dallmann A. Development of a novel Physiologically Based Biopharmaceutics modeling (PBBM) framework using the Open Systems Pharmacology Suite, Part 2: in vivo pharmacokinetic modeling of vericiguat. Eur J Pharm Sci.* 2025 July 2; 107189. doi: 10.1016/j.ejps.2025.107189. Epub ahead of print.](https://www.sciencedirect.com/science/article/pii/S0928098725001885)
