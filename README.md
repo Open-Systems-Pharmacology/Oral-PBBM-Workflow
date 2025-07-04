@@ -7,8 +7,9 @@ The following decision tree assists in determining which features of the OSP Sol
 
 ![gim](https://github.com/Open-Systems-Pharmacology/Oral-PBBM-Workflow/blob/main/Figures/DecisionTree.png)
 
-Template files for each of these tools can be found in the respective sub-folders. These template files are ready to be used and need to be populated with own data. 
-The application of this workflow to vericiguat and the corresponding files can be found in the sub-folder Vericiguat.
+TTemplate files for each of these tools are available in their respective sub-folders. These templates are ready to use and need to be populated with your own data. 
+
+The application of this workflow to vericiguat, along with the corresponding files, can be found in the "Vericiguat" sub-folder.
 
 ## OSP Solubility Toolbox
 
