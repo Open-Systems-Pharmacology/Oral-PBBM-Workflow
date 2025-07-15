@@ -10,7 +10,7 @@ The following decision tree assists in determining which features of the OSP Sol
 
 Template files for each of these tools are available in their respective sub-folders. These templates are ready to use and need to be populated with your own data. 
 
-The application of this workflow to vericiguat, along with the corresponding files, can be found in the [Vericiguat sub-folder](https://github.com/Open-Systems-Pharmacology/Oral-PBBM-Workflow/tree/main/Vericiguat).
+The application of this workflow to vericiguat, along with the corresponding files, can be found in the [Vericiguat sub-folder](https://github.com/Open-Systems-Pharmacology/Oral-PBBM-Workflow/tree/main/Vericiguat-Example).
 
 ## OSP Solubility Toolbox
 
@@ -22,7 +22,7 @@ The in vitro dissolution model has been presented previously by Vrenken et al. [
 
 ## PBPK Model Upgrade
 
-The PBPK model upgrade incorporating relevant changes required for this PBBM workflow will be made available after publication of the respective article by Vrenken et al. [[2](#References)].
+The PBPK model upgrade incorporating relevant changes required for this PBBM workflow are described in the article by Vrenken et al. [[2](#References)]. These features will be officially implemented in PK-Sim v13. A beta version compatible with version 11.2 is distributed in the respective [sub-folder](https://github.com/Open-Systems-Pharmacology/Oral-PBBM-Workflow/tree/main/PBPK-Model).
 
 ## Code of conduct
 Everyone interacting in the Open Systems Pharmacology community (codebases, issue trackers, chat rooms, mailing lists etc...) is expected to follow the Open Systems Pharmacology [code of conduct](https://github.com/Open-Systems-Pharmacology/Suite/blob/master/CODE_OF_CONDUCT.md#contributor-covenant-code-of-conduct).
