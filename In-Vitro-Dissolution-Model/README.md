@@ -66,18 +66,20 @@ Relevant parameters of the compound and formulation as well as the dissolution e
 
   **Table 1: pH values and bile salt concentrations of several biorelevant media**
     
-  | Medium    | pH  | Bile Salt Concentration [mM] | Bile salt type      | Lecithin concentration [mM]|
-  |-----------|-----|------------------------------|---------------------|----------------------------|
-  | FaSSGF    | 1.6 | 0.08                         | Sodium taurocholate | 0.02                       |
-  | FaSSIF-V1 | 6.5 | 3.0                          | Sodium taurocholate | 0.75                       |
-  | FaSSIF-V2 | 6.5 | 3.0                          | Sodium taurocholate | 0.2                        |
-  | FaSSCoF   | 7.8 | 0.15                         | Sodium cholate      | 0.3                        |
-  | FeSSIF-V1 | 5.0 | 15                           | Sodium taurocholate | 3.75                       |
-  | FeSSIF-V2 | 5.8 | 10                           | Sodium taurocholate | 2.0                        |
-  | FeSSCoF   | 6.0 | 0.6                          | Sodium cholate      | 0.5                        |
-    
-  Source: Markopoulos et al. [[3](#References)].
+  | Medium    | pH  | Bile Salt Concentration [mM] | Bile salt type      | Lecithin concentration [mM]| Source |
+  |-----------|-----|------------------------------|---------------------|----------------------------|--------|
+  | FaSSGF    | 1.6 | 0.08                         | Sodium taurocholate | 0.02                       | Markopoulos et al. [[3](#References)] |
+  | FaSSIF-V1 | 6.5 | 3.0                          | Sodium taurocholate | 0.75                       | Markopoulos et al. [[3](#References)] |
+  | FaSSIF-V2 | 6.5 | 3.0                          | Sodium taurocholate | 0.2                        | Markopoulos et al. [[3](#References)] |
+  | FaSSCoF   | 7.8 | 0.15                         | Sodium cholate      | 0.3                        | Markopoulos et al. [[3](#References)] |
+  | FEDGAS<sub>early</sub>  | 6.0 | 0.62           | Sodium taurocholate | *not reported*             | [https://biorelevant.com/learning_center/FEDGAS-composition](https://biorelevant.com/learning_center/FEDGAS-composition) |
+  | FEDGAS<sub>middle</sub> | 4.5 | 0.62           | Sodium taurocholate | *not reported*             | [https://biorelevant.com/learning_center/FEDGAS-composition](https://biorelevant.com/learning_center/FEDGAS-composition) |
+  | FEDGAS<sub>late</sub>   | 3.0 | 0.62           | Sodium taurocholate | *not reported*             | [https://biorelevant.com/learning_center/FEDGAS-composition](https://biorelevant.com/learning_center/FEDGAS-composition) |
+  | FeSSIF-V1 | 5.0 | 15                           | Sodium taurocholate | 3.75                       | Markopoulos et al. [[3](#References)] |
+  | FeSSIF-V2 | 5.8 | 10                           | Sodium taurocholate | 2.0                        | Markopoulos et al. [[3](#References)] |
+  | FeSSCoF   | 6.0 | 0.6                          | Sodium cholate      | 0.5                        | Markopoulos et al. [[3](#References)] |
 
+  
 * `Reference pH`: pH of the solution in which the `Solubility at reference pH` of the drug is measured.
 * `Solubility at reference pH`: Measured aqueous (thermodynamic) solubility of the drug.
 * `Solubility gain per charge`: Factor by which the solubility increases with each ionization step of the drug. This parameter can be fitted using the OSP Solubility Toolbox and should be updated with the fitted value. 
