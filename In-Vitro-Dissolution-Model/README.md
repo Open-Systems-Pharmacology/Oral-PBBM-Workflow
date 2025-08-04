@@ -12,7 +12,7 @@ The model is built upon the [OSP Solubility Toolbox](https://github.com/AndreDlm
 
 ## Prerequisites
 
-To use the in vitro dissolution model, ensure you have the [OSP Software Suite](https://github.com/Open-Systems-Pharmacology/Suite/releases) installed (version 11.3 or higher).
+To use the in vitro dissolution model, ensure you have the [OSP Software Suite](https://github.com/Open-Systems-Pharmacology/Suite/releases) installed. Please note that this workflow was developed with version 11.2 and has not been tested with higher software versions.
 
 **Note:** If you use OSP version <13, please update the OSP Suite dimension database in both your Mobi installation folder as follows: 
 Download the file [`OSPSuite.Dimensions.xml`](https://github.com/Open-Systems-Pharmacology/Oral-PBBM-Workflow/blob/main/In-Vitro-Dissolution-Model/OSPSuite.Dimensions.xml) distributed in this repository and copy it into both your Mobi installation folder (overwrite the existing file). 
@@ -256,4 +256,5 @@ The framework is distributed under the [GPLv2 License](https://github.com/Open-S
 [15] [Clifford, J.and Pethica B.A. The Self-Diffusion Coefficient of Sodium Dodecyl Sulfate Micelles.  The Journal of Physical Chemistry 1966  70(10): 3345-3346. doi: 10.1021/j100882a506.](https://doi.org/10.1021/j100882a506)
 
 [16] [Duplâtre G, Ferreira Marques M. F., da Graça Miguel M. Size of Sodium Dodecyl Sulfate Micelles in Aqueous Solutions as Studied by Positron Annihilation Lifetime Spectroscopy. The Journal of Physical Chemistry 1996 100(41):16608-16612. doi: 10.1021/jp960644m.](https://doi.org/10.1021/jp960644m)
+
 
