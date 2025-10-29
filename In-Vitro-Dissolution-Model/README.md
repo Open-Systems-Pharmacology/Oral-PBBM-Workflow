@@ -160,11 +160,26 @@ Relevant parameters of the compound and formulation as well as the dissolution e
   Therefore, if `UseEffectiveDiffusion` is set to `1`, bound and unbound drug species are treated as equivalent species, resulting in $h_b$ = $h_u$ and $D_u = D_{mic} = D_{eff}$. This model should be used cautiously when extrapolating to other experimental conditions.
   
 
-* `H_Radius paddle max (H)`, `H_radius paddle min (I)`, `H_Radius vessel (R)`, `H_Distance between paddle and vessel bottom`, `H_Height of the paddle (B)`, `H_Shaft diameter (Q)`, and `H_T`: These parameters correspond to various geometrical measurements of the dissolution apparatus and vessel. They are pre-defined for the USP-2 dissolution apparatus but may require adjustments for use with other dissolution apparatuses.
+* `H_Radius paddle max (H)`, `H_radius paddle min (I)`, `H_Radius vessel (R)`, `H_Distance between paddle and vessel bottom (X)`, `H_Height of the paddle (B)`, `H_Shaft diameter (Q)`, and `H_T`: These parameters correspond to various geometrical measurements of the dissolution apparatus and vessel. They are pre-defined for the USP-2 dissolution apparatus but may require adjustments for use with other dissolution apparatuses. Pepin et al. [[10](#References)] report the following values for the USP2 dissolution appartus:
+  
+  **Table 5: Geometrical dimensions of the USP2 dissolution apparatus according to Pepin et al. [[10](#References)]**
+  
+  | Variable | Parameter name           | Value | Unit |
+  | -------- | ------------------------ | ----- | ---- |
+  | H        | Maximum paddle radius    | 37.0  | mm   |
+  | I        | Minimum paddle radius    | 21.0  | mm   |
+  | R        | Vessel internal radius   | 50.5  | mm   |
+  | X        | Distance between paddle and vessel bottom | 25.0 | mm |
+  | B        | Height of the paddle     | 19.0  | mm   |
+  | Q        | Shaft diameter           | 9.8   | mm   |
+  | H_T      | Thickness of the paddle  | 4.0   | mm   |
+
+  Further information on the geometry of the USP2 dissolution appartus can be found in Pepin et al. [[10](#References)].
+  
 * `H_RPM`: Revolutions per minute indicating how quickly the stirrer of the dissolution apparatus is rotating, which affects the hydrodynamics of the dissolution medium and the rate at which the drug dissolves.
 * `H_Temperature`: Used to calculate the density of water. When changing this parameter from 37 <sup>o</sup>C, other parameters might need to be adjusted manually (e.g., solubility related parameters, p*K*<sub>a</sub>, diffusion coefficients)
 * `H_Volume border`: Determines which experimentally fitted cubic function is used to calculate the `H_Power number` inputted by the USP-2 paddle. The default value (600 mL) is based on the experimental data used by Pepin et al. [[10](#References)] with 500 ml and 900 ml of fluid in the USP-2 vessel.
-* `H_Power per mass correction factor`: Correction factor as W/kg is not included in the OSP dimension database.
+* `H_Power per mass correction factor`: Correction factor as the unit W/kg is not included in the OSP dimension database.
 * `H_Gravitational acceleration`: Acceleration due to earth's gravity (constant).
 * `H_gCor`: Correction factor for `H_Gravitational acceleration`, as unit of acceleration (m/s<sup>2</sup>) is not included in the OSP dimension database.
 * `H_K limit value`: Threshold to determine whether the dissolving drug particle moves with the fluid (the kinetic forces acting on the particle are higher than the resistant forces) or resists movement (particle resistance energy is higher than the particle kinetic energy when moving with the fluid). The value of 1 means that the ration between the kinetic and resistance energy is ≥ 1 the particle moves with the fluid and if the ratio is < 1 the particle resists movement, which affects the calculation method of the Reynolds number.
@@ -256,6 +271,7 @@ The framework is distributed under the [GPLv2 License](https://github.com/Open-S
 [15] [Clifford, J.and Pethica B.A. The Self-Diffusion Coefficient of Sodium Dodecyl Sulfate Micelles.  The Journal of Physical Chemistry 1966  70(10): 3345-3346. doi: 10.1021/j100882a506.](https://doi.org/10.1021/j100882a506)
 
 [16] [Duplâtre G, Ferreira Marques M. F., da Graça Miguel M. Size of Sodium Dodecyl Sulfate Micelles in Aqueous Solutions as Studied by Positron Annihilation Lifetime Spectroscopy. The Journal of Physical Chemistry 1996 100(41):16608-16612. doi: 10.1021/jp960644m.](https://doi.org/10.1021/jp960644m)
+
 
 
 
