@@ -164,15 +164,15 @@ Relevant parameters of the compound and formulation as well as the dissolution e
   
   **Table 5: Geometrical dimensions of the USP2 dissolution apparatus according to Pepin et al. [[10](#References)]**
   
-  | Variable | Parameter name           | Value | Unit |
-  | -------- | ------------------------ | ----- | ---- |
-  | H        | Maximum paddle radius    | 37.0  | mm   |
-  | I        | Minimum paddle radius    | 21.0  | mm   |
-  | R        | Vessel internal radius   | 50.5  | mm   |
-  | X        | Distance between paddle and vessel bottom | 25.0 | mm |
-  | B        | Height of the paddle     | 19.0  | mm   |
-  | Q        | Shaft diameter           | 9.8   | mm   |
-  | H_T      | Thickness of the paddle  | 4.0   | mm   |
+  | Variable | Parameter name           | Value [mm] |
+  | -------- | ------------------------ | ---------- |
+  | H        | Maximum paddle radius    | 37.0  |
+  | I        | Minimum paddle radius    | 21.0  |
+  | R        | Vessel internal radius   | 50.5  |
+  | X        | Distance between paddle and vessel bottom | 25.0 |
+  | B        | Height of the paddle     | 19.0  |
+  | Q        | Shaft diameter           | 9.8   |
+  | H_T      | Thickness of the paddle  | 4.0   |
 
   Further information on the geometry of the USP2 dissolution appartus can be found in Pepin et al. [[10](#References)].
   
@@ -271,6 +271,7 @@ The framework is distributed under the [GPLv2 License](https://github.com/Open-S
 [15] [Clifford, J.and Pethica B.A. The Self-Diffusion Coefficient of Sodium Dodecyl Sulfate Micelles.  The Journal of Physical Chemistry 1966  70(10): 3345-3346. doi: 10.1021/j100882a506.](https://doi.org/10.1021/j100882a506)
 
 [16] [Duplâtre G, Ferreira Marques M. F., da Graça Miguel M. Size of Sodium Dodecyl Sulfate Micelles in Aqueous Solutions as Studied by Positron Annihilation Lifetime Spectroscopy. The Journal of Physical Chemistry 1996 100(41):16608-16612. doi: 10.1021/jp960644m.](https://doi.org/10.1021/jp960644m)
+
 
 
 
