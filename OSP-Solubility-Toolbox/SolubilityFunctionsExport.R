@@ -124,60 +124,19 @@ aq.polt.f <- function(df,pH.range) {
 
 # intrinsic pH and solubility calculation functions
 pH.int.f <- function(CT0,CT1,CT2,pKa0,pKa1,pKa2) {
-  if (CT0 < 0 & CT1 == 0 & CT2 == 0) { # A N N
-    pH.int <- 1
-  } else if (CT0 == 0 & CT1 < 0 & CT2 == 0) { # N A N
-    pH.int <- 1
-  } else if (CT0 == 0 & CT1 == 0 & CT2 < 0) { # N N A
-    pH.int <- 1
-  } else if (CT0 < 0 & CT1 < 0 & CT2 == 0) { # A A N
-    pH.int <- 1
-  } else if (CT0 == 0 & CT1 < 0 & CT2 < 0) { # N A A
-    pH.int <- 1
-  } else if (CT0 < 0 & CT1 == 0 & CT2 < 0) { # A N A
-    pH.int <- 1
-  } else if (CT0 < 0 & CT1 < 0 & CT2 < 0) { # A A A
-    pH.int <- 1
-  } else if (CT0 > 0 & CT1 == 0 & CT2 == 0) { # B N N
-    pH.int <- 14
-  } else if (CT0 == 0 & CT1 > 0 & CT2 == 0) { # N B N
-    pH.int <- 14
-  } else if (CT0 == 0 & CT1 == 0 & CT2 > 0) { # N N B
-    pH.int <- 14
-  } else if (CT0 > 0 & CT1 > 0 & CT2 == 0) { # B B N
-    pH.int <- 14
-  } else if (CT0 > 0 & CT1 == 0 & CT2 > 0) { # B N B
-    pH.int <- 14
-  } else if (CT0 == 0 & CT1 > 0 & CT2 > 0) { # N B B
-    pH.int <- 14
-  } else if (CT0 > 0 & CT1 > 0 & CT2 > 0) { # B B B
-    pH.int <- 14
-  } else if (CT0 < 0 & CT1 > 0 & CT2 == 0) { # A B N
-    pH.int <- (pKa0+pKa1)/2
-  } else if (CT0 == 0 & CT1 < 0 & CT2 > 0) { # N A B
-    pH.int <- (pKa1+pKa2)/2
-  } else if (CT0 > 0 & CT1 < 0 & CT2 == 0) { # B A N
-    pH.int <- (pKa0+pKa1)/2
-  } else if (CT0 == 0 & CT1 > 0 & CT2 < 0) { # N B A
-    pH.int <- (pKa1+pKa2)/2
-  } else if (CT0 < 0 & CT1 < 0 & CT2 > 0) { # A A B
-    pH.int <- (min(pKa0,pKa1)+pKa2)/2
-  } else if (CT0 > 0 & CT1 < 0 & CT2 < 0) { # B A A
-    pH.int <- (min(pKa1,pKa2)+pKa0)/2
-  } else if (CT0 < 0 & CT1 > 0 & CT2 < 0) { # A B A
-    pH.int <- (min(pKa0,pKa2)+pKa1)/2
-  } else if (CT0 > 0 & CT1 > 0 & CT2 < 0) { # B B A
-    pH.int <- (max(pKa0,pKa1)+pKa2)/2
-  } else if (CT0 < 0 & CT1 > 0 & CT2 > 0) { # A B B
-    pH.int <- (max(pKa1,pKa2)+pKa0)/2
-  } else if (CT0 > 0 & CT1 < 0 & CT2 > 0) { # B A B
-    pH.int <- (max(pKa0,pKa2)+pKa1)/2
-  } else if (CT0 == 0 & CT1 == 0 & CT2 == 0) { # N N N
-    pH.int <- 0
-  } else {
-    stop("Incompatible API type, are all pKa values and types configured correctly?")
+  CT <- c(CT0,CT1,CT2)
+  n.acids <- sum(CT < 0)
+  n.bases <- sum(CT > 0)
+
+  if (n.bases == 0) {
+    return(0)
   }
-  return(pH.int)
+  if (n.acids == 0) {
+    return(14)
+  }
+
+  pKa <- sort(c(pKa0,pKa1,pKa2)[CT != 0])
+  return(mean(pKa[c(n.bases,n.bases+1)]))
 }
 
 S.int.f <- function(CT0,CT1,CT2,pKa0,pKa1,pKa2,S_ref,ref_pH) {
